@@ -59,35 +59,20 @@ main{max-width:880px;margin:0 auto;padding:44px 32px 80px;}
 .stg-title{font-family:var(--ff-h);font-size:clamp(26px,4vw,40px);font-weight:700;line-height:1.1;margin-bottom:8px;color:var(--brown);}
 .stg-desc{font-family:var(--ff-b);font-style:italic;font-size:15px;color:var(--muted);margin-bottom:32px;line-height:1.65;border-left:3px solid var(--ochre);padding-left:14px;}
 
-/* ── AUDIO UPLOAD WIDGET ── */
-.audio-widget{background:#fff;border:1px solid var(--border2);border-radius:8px;margin-bottom:28px;overflow:hidden;}
-.aw-head{background:var(--brown);color:var(--cream);padding:12px 18px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
-.aw-head-title{font-family:var(--ff-u);font-size:13px;font-weight:600;letter-spacing:.04em;}
-.aw-head-hint{font-family:var(--ff-u);font-size:10px;color:rgba(248,244,237,.55);margin-left:auto;}
-.aw-body{padding:14px 18px;}
-.aw-drop{border:2px dashed var(--border2);border-radius:6px;background:var(--warm);cursor:pointer;transition:all .2s;position:relative;display:flex;align-items:center;gap:14px;padding:14px 18px;}
-.aw-drop:hover,.aw-drop.drag{border-color:var(--ochre);background:rgba(196,126,42,.05);}
-.aw-drop input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
-.aw-drop-icon{font-size:26px;flex-shrink:0;}
-.aw-drop-texts{flex:1;}
-.aw-drop-main{font-family:var(--ff-u);font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--brown);}
-.aw-drop-sub{font-family:var(--ff-u);font-size:10px;color:var(--muted);margin-top:3px;line-height:1.5;}
-.aw-drop-kbd{display:inline-block;background:var(--paper);border:1px solid var(--border2);border-radius:3px;padding:1px 5px;font-family:var(--ff-u);font-size:9px;color:var(--brown);margin:0 1px;}
-.aw-status{margin-top:10px;padding:9px 13px;border-radius:4px;font-family:var(--ff-u);font-size:12px;display:none;align-items:center;gap:8px;}
-.aw-status.ok{background:rgba(90,122,92,.1);border:1px solid var(--sage);color:var(--sage);display:flex;}
-.aw-status.warn{background:rgba(196,126,42,.09);border:1px solid var(--ochre);color:var(--brown);display:flex;}
-.aw-list{margin-top:8px;display:flex;flex-direction:column;gap:5px;max-height:160px;overflow-y:auto;}
-.aw-item{display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--warm);border:1px solid var(--border);border-radius:4px;}
-.aw-item-play{background:none;border:1px solid var(--border2);border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);font-size:10px;transition:all .15s;flex-shrink:0;}
-.aw-item-play:hover{border-color:var(--ochre);color:var(--ochre);}
-.aw-item-name{font-family:var(--ff-u);font-size:11px;color:var(--ink);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.aw-item-match{font-family:var(--ff-u);font-size:9px;padding:2px 6px;border-radius:2px;background:rgba(90,122,92,.12);color:var(--sage);letter-spacing:.08em;text-transform:uppercase;flex-shrink:0;}
-.aw-item-nomatch{font-family:var(--ff-u);font-size:9px;padding:2px 6px;border-radius:2px;background:rgba(138,126,114,.1);color:var(--muted);letter-spacing:.06em;text-transform:uppercase;flex-shrink:0;}
-.aw-item-del{background:none;border:none;cursor:pointer;color:var(--muted);font-size:12px;padding:2px 4px;transition:color .15s;flex-shrink:0;}
-.aw-item-del:hover{color:var(--rust);}
-.aw-add-more{margin-top:6px;padding:6px 12px;border:1px solid var(--border2);border-radius:4px;background:none;font-family:var(--ff-u);font-size:10px;cursor:pointer;color:var(--muted);transition:all .18s;position:relative;display:inline-flex;align-items:center;gap:6px;}
-.aw-add-more input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
-.aw-add-more:hover{border-color:var(--ochre);color:var(--ochre);}
+/* ── GITHUB MP3 INFO ── */
+.mp3-info{background:#fff;border:1px solid var(--border2);border-radius:8px;margin-bottom:28px;overflow:hidden;}
+.mp3-info-head{background:var(--brown);color:var(--cream);padding:11px 18px;display:flex;align-items:center;gap:10px;}
+.mp3-info-title{font-family:var(--ff-u);font-size:13px;font-weight:600;letter-spacing:.04em;}
+.mp3-info-body{padding:13px 18px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+.mp3-info-text{font-family:var(--ff-u);font-size:12px;color:var(--muted);line-height:1.6;flex:1;}
+.mp3-info-text code{background:var(--paper);border:1px solid var(--border);border-radius:3px;padding:1px 5px;font-size:11px;color:var(--brown);}
+.mp3-status-wrap{display:flex;flex-direction:column;gap:4px;min-width:160px;}
+.mp3-status-item{display:flex;align-items:center;gap:6px;font-family:var(--ff-u);font-size:10px;}
+.mp3-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.mp3-dot.ok{background:var(--sage);}
+.mp3-dot.miss{background:var(--muted);opacity:.4;}
+.mp3-dot.loading{background:var(--ochre);animation:blink 1s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
 
 /* ── STAGE 1 WORD CARDS ── */
 .words-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-bottom:32px;}
@@ -295,26 +280,17 @@ body{padding-bottom:env(safe-area-inset-bottom);}
   <div class="stg-title">12 kluczowych słów</div>
   <div class="stg-desc">Poznaj podstawowe słownictwo malarstwa olejnego. Kliknij 🔊 przy słowie — usłyszysz angielską wymowę (syntezator) lub Twoje własne nagranie MP3, jeśli je wgrasz poniżej.</div>
 
-  <div class="audio-widget">
-    <div class="aw-head">
+  <div class="mp3-info">
+    <div class="mp3-info-head">
       <span>🎵</span>
-      <span class="aw-head-title">Wgraj pliki MP3 z wymową</span>
-      <span class="aw-head-hint">Nazwa pliku = angielskie słowo, np. canvas.mp3</span>
+      <span class="mp3-info-title">Nagrania MP3 — wczytywanie z GitHub</span>
     </div>
-    <div class="aw-body">
-      <div class="aw-drop" id="awDrop1">
-        <input type="file" accept=".mp3,audio/*" multiple onchange="handleUpload(this.files,'1')">
-        <div class="aw-drop-icon">🎧</div>
-        <div class="aw-drop-texts">
-          <div class="aw-drop-main">Kliknij i zaznacz pliki MP3</div>
-          <div class="aw-drop-sub">
-            Zaznacz wszystkie naraz: <span class="aw-drop-kbd">Ctrl</span>+<span class="aw-drop-kbd">A</span> lub <span class="aw-drop-kbd">Ctrl</span>+klik<br>
-            canvas.mp3 · easel.mp3 · gesso.mp3 · palette.mp3 · linseed-oil.mp3 …
-          </div>
-        </div>
+    <div class="mp3-info-body">
+      <div class="mp3-info-text">
+        Pliki MP3 są wczytywane automatycznie z folderu <code>mp3/</code> w repozytorium GitHub.<br>
+        Aby dodać nagranie: wgraj plik <code>canvas.mp3</code> do folderu <code>mp3/</code> na GitHub — pojawi się tutaj automatycznie.
       </div>
-      <div class="aw-status" id="awStatus1"></div>
-      <div class="aw-list" id="awList1"></div>
+      <div class="mp3-status-wrap" id="mp3StatusWrap"></div>
     </div>
   </div>
 
@@ -382,26 +358,15 @@ body{padding-bottom:env(safe-area-inset-bottom);}
   <div class="stg-title">Mini-konwersacje</div>
   <div class="stg-desc">Dwa realistyczne dialogi: w pracowni i ze sprzedażą obrazu. Każda kwestia po angielsku i po polsku. Słowa z modułu wyróżnione kolorem. Wgraj MP3 rozmów lub użyj syntezatora mowy 🔊.</div>
 
-  <div class="audio-widget">
-    <div class="aw-head">
+  <div class="mp3-info">
+    <div class="mp3-info-head">
       <span>🎵</span>
-      <span class="aw-head-title">Wgraj nagrania dialogów MP3</span>
-      <span class="aw-head-hint">np. dialog1.mp3 · dialog2.mp3</span>
+      <span class="mp3-info-title">Nagrania dialogów — wczytywanie z GitHub</span>
     </div>
-    <div class="aw-body">
-      <div class="aw-drop" id="awDrop2">
-        <input type="file" accept=".mp3,audio/*" multiple onchange="handleUpload(this.files,'2')">
-        <div class="aw-drop-icon">🎙</div>
-        <div class="aw-drop-texts">
-          <div class="aw-drop-main">Kliknij i zaznacz pliki MP3 z dialogami</div>
-          <div class="aw-drop-sub">
-            Zaznacz wszystkie naraz: <span class="aw-drop-kbd">Ctrl</span>+<span class="aw-drop-kbd">A</span><br>
-            dialog1.mp3 · dialog2.mp3 lub osobne pliki dla każdej kwestii
-          </div>
-        </div>
+    <div class="mp3-info-body">
+      <div class="mp3-info-text">
+        Nagrania dialogów wczytywane są z GitHub. Wgraj <code>dialog1.mp3</code> i <code>dialog2.mp3</code> do folderu <code>mp3/</code> — przycisk 🔊 użyje Twojego nagrania zamiast syntezatora.
       </div>
-      <div class="aw-status" id="awStatus2"></div>
-      <div class="aw-list" id="awList2"></div>
     </div>
   </div>
 
@@ -674,38 +639,56 @@ const QUIZ = [
 let curStage = 1;
 const doneStages = new Set([1]);
 let fcIdx = 0;
-const audioFiles = {};
 let quizAnswers = {};
 let quizBuilt = false;
 let qCorrect = 0, qWrong = 0;
 
 // ══════════════════ AUDIO ══════════════════
-function speakWord(text, btn) {
-  const mp3 = findMP3(text);
-  if (mp3) { playMP3(mp3, btn); return; }
-  if (!('speechSynthesis' in window)) return;
+const MP3_BASE = '../mp3/';
+const mp3Available = {};
+
+function wordToFilename(text) {
+  return text.toLowerCase().trim().replace(/\s+/g,'-').replace(/[^a-z0-9\-]/g,'');
+}
+
+async function checkMP3(word) {
+  const key = wordToFilename(word);
+  if (key in mp3Available) return mp3Available[key];
+  try {
+    const r = await fetch(MP3_BASE + key + '.mp3', {method:'HEAD'});
+    mp3Available[key] = r.ok;
+  } catch { mp3Available[key] = false; }
+  return mp3Available[key];
+}
+
+async function speakWord(text, btn) {
+  if (btn) btn.classList.add('sp');
+  const key = wordToFilename(text);
+  const exists = await checkMP3(text);
+  if (exists) {
+    try {
+      const audio = new Audio(MP3_BASE + key + '.mp3');
+      audio.onended = () => { if (btn) btn.classList.remove('sp'); };
+      audio.onerror = () => { if (btn) btn.classList.remove('sp'); speakTTS(text, btn); };
+      const p = audio.play();
+      if (p) p.catch(() => { if (btn) btn.classList.remove('sp'); speakTTS(text, btn); });
+      return;
+    } catch { if (btn) btn.classList.remove('sp'); }
+  }
+  speakTTS(text, btn);
+}
+
+function speakTTS(text, btn) {
+  if (!('speechSynthesis' in window)) { if (btn) btn.classList.remove('sp'); return; }
   window.speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
   u.lang = 'en-GB'; u.rate = 0.82;
   const vv = window.speechSynthesis.getVoices();
   const v = vv.find(x=>x.lang.startsWith('en-GB')) || vv.find(x=>x.lang.startsWith('en'));
   if (v) u.voice = v;
-  if (btn) { btn.classList.add('sp'); u.onend = ()=>btn.classList.remove('sp'); }
+  u.onend = () => { if (btn) btn.classList.remove('sp'); };
+  u.onerror = () => { if (btn) btn.classList.remove('sp'); };
   window.speechSynthesis.speak(u);
-}
-
-function playMP3(url, btn) {
-  const a = new Audio(url);
-  if (btn) { btn.classList.add('sp'); a.onended = ()=>btn.classList.remove('sp'); }
-  a.play();
-}
-
-function findMP3(text) {
-  const key = text.toLowerCase().replace(/[^a-z0-9]/g,'');
-  for (const k in audioFiles) {
-    if (k.replace(/[^a-z0-9]/g,'') === key) return audioFiles[k];
-  }
-  return null;
 }
 
 function speakDialogSequence(lines) {
@@ -725,66 +708,25 @@ function speakDialogSequence(lines) {
   next();
 }
 
-// ══════════════════ UPLOAD ══════════════════
-function handleUpload(files, listId) {
-  if (!files || files.length === 0) return;
-  let loaded = 0;
-  Array.from(files).forEach(f => {
-    const name = f.name.toLowerCase();
-    if (!name.endsWith('.mp3') && !f.type.startsWith('audio/')) return;
-    const key = name.replace(/\.mp3$/, '').replace(/[^a-z0-9\s]/g, ' ').trim();
-    // Revoke old URL if re-uploading same file
-    if (audioFiles[key]) URL.revokeObjectURL(audioFiles[key]);
-    audioFiles[key] = URL.createObjectURL(f);
-    loaded++;
-  });
-  renderUploadStatus(listId, loaded);
-  renderAudioList('1');
-  renderAudioList('2');
-}
-
-function renderUploadStatus(listId, count) {
-  const el = document.getElementById('awStatus' + listId);
-  if (!el) return;
-  if (count === 0) {
-    el.className = 'aw-status warn';
-    el.innerHTML = '⚠️ Nie znaleziono plików MP3. Upewnij się że wybierasz pliki .mp3';
-  } else {
-    const matched = WORDS.filter(w => findMP3(w.en)).length;
-    el.className = 'aw-status ok';
-    el.innerHTML = `✓ Dodano ${count} plik${count===1?'':'ów'} MP3 · Dopasowano do ${matched} z ${WORDS.length} słów`;
-  }
-}
-
-function renderAudioList(listId) {
-  const el = document.getElementById('awList' + listId);
-  if (!el) return;
-  el.innerHTML = '';
-  if (Object.keys(audioFiles).length === 0) return;
-  Object.entries(audioFiles).forEach(([name, url]) => {
-    const matched = WORDS.find(w => {
-      const wk = w.en.toLowerCase().replace(/[^a-z0-9]/g, '');
-      const nk = name.replace(/[^a-z0-9]/g, '');
-      return wk === nk;
-    });
-    const div = document.createElement('div');
-    div.className = 'aw-item';
-    div.innerHTML = `
-      <button class="aw-item-play" onclick="playMP3('${url}')">▶</button>
-      <span class="aw-item-name">🎵 ${name}.mp3</span>
-      ${matched
-        ? `<span class="aw-item-match">✓ ${matched.pl}</span>`
-        : `<span class="aw-item-nomatch">brak dopasowania</span>`}
-      <button class="aw-item-del" onclick="deleteAudio('${name}')">✕</button>
-    `;
-    el.appendChild(div);
-  });
-}
-
-function deleteAudio(name) {
-  if (audioFiles[name]) { URL.revokeObjectURL(audioFiles[name]); delete audioFiles[name]; }
-  renderAudioList('1');
-  renderAudioList('2');
+async function buildMP3Status() {
+  const wrap = document.getElementById('mp3StatusWrap');
+  if (!wrap) return;
+  wrap.innerHTML = '<div style="font-family:var(--ff-u);font-size:10px;color:var(--muted)">Sprawdzam nagrania…</div>';
+  const results = await Promise.all(WORDS.map(async w => ({
+    word:w.en, pl:w.pl, ok: await checkMP3(w.en)
+  })));
+  const found = results.filter(r=>r.ok).length;
+  wrap.innerHTML = `
+    <div style="font-family:var(--ff-u);font-size:11px;font-weight:600;color:${found>0?'var(--sage)':'var(--muted)'};margin-bottom:6px;">
+      ${found>0 ? `✓ ${found} z ${WORDS.length} nagrań` : 'Brak nagrań MP3 — używam syntezatora'}
+    </div>
+    ${results.map(r=>`
+      <div class="mp3-status-item">
+        <div class="mp3-dot ${r.ok?'ok':'miss'}"></div>
+        <span style="color:${r.ok?'var(--ink)':'var(--muted)'};font-family:var(--ff-u);font-size:10px">${r.word}</span>
+        ${r.ok?'':'<span style="opacity:.4;font-size:9px;font-family:var(--ff-u)">TTS</span>'}
+      </div>`).join('')}
+  `;
 }
 
 // ══════════════════ STAGE NAV ══════════════════
@@ -1084,6 +1026,7 @@ buildWordCards();
 renderFC();
 buildContext();
 buildDialogs();
+buildMP3Status();
 if ('speechSynthesis' in window) {
   window.speechSynthesis.getVoices();
   window.speechSynthesis.onvoiceschanged = ()=>{};
