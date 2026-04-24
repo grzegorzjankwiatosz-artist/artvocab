@@ -1,94 +1,65 @@
-// ArtVocab Service Worker v1.1
-// github: grzegorzjankwiatosz-artist/artvocab
+const CACHE_NAME = 'artvocab-v2';
 
-const CACHE_STATIC = 'artvocab-static-v1';
-const CACHE_AUDIO  = 'artvocab-audio-v1';
-
-const STATIC_ASSETS = [
-  './',
-  './index.html',
-  './manifest.json',
-  './icon-192.png',
-  './icon-512.png',
-  './modul1/index.html',
-  'https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,700;1,400&display=swap',
-];
-
-// ── INSTALL ──────────────────────────────────────────
+// instalacja
 self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_STATIC).then(cache =>
-      Promise.allSettled(
-        STATIC_ASSETS.map(url =>
-          cache.add(url).catch(e => console.warn('[SW] skip:', url, e.message))
-        )
-      )
-    ).then(() => self.skipWaiting())
-  );
+  self.skipWaiting(); // od razu aktywuj nową wersję
 });
 
-// ── ACTIVATE ─────────────────────────────────────────
+// aktywacja
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
-        keys
-          .filter(k => k !== CACHE_STATIC && k !== CACHE_AUDIO)
-          .map(k => caches.delete(k))
+        keys.map(key => {
+          if (key !== CACHE_NAME) return caches.delete(key);
+        })
       )
-    ).then(() => self.clients.claim())
+    )
   );
+  self.clients.claim();
 });
 
-// ── FETCH ─────────────────────────────────────────────
+// fetch
 self.addEventListener('fetch', event => {
-  const url = new URL(event.request.url);
+  const req = event.request;
 
-  // MP3 — cache forever
-  if (url.pathname.endsWith('.mp3')) {
-    event.respondWith(audioStrategy(event.request));
+  // HTML → network first (zawsze świeże)
+  if (req.headers.get('accept')?.includes('text/html')) {
+    event.respondWith(networkFirst(req));
     return;
   }
 
-  // Google Fonts — cache first
-  if (url.hostname.includes('fonts.google') || url.hostname.includes('fonts.gstatic')) {
-    event.respondWith(cacheFirst(event.request));
-    return;
-  }
-
-  // App shell — cache first
-  event.respondWith(cacheFirst(event.request));
+  // reszta → cache first
+  event.respondWith(cacheFirst(req));
 });
 
-// ── STRATEGIES ────────────────────────────────────────
+// NETWORK FIRST (dla HTML)
+async function networkFirst(request) {
+  const cache = await caches.open(CACHE_NAME);
+  try {
+    const fresh = await fetch(request);
+    cache.put(request, fresh.clone());
+    return fresh;
+  } catch {
+    const cached = await cache.match(request);
+    return cached || new Response('Offline', { status: 503 });
+  }
+}
+
+// CACHE FIRST (dla plików)
 async function cacheFirst(request) {
-  const cache = await caches.open(CACHE_STATIC);
+  const cache = await caches.open(CACHE_NAME);
   const cached = await cache.match(request);
   if (cached) return cached;
-  try {
-    const response = await fetch(request);
-    if (response.ok) cache.put(request, response.clone());
-    return response;
-  } catch {
-    return new Response('Offline — zasób niedostępny.', {
-      status: 503, headers: { 'Content-Type': 'text/plain; charset=utf-8' }
-    });
-  }
+
+  const fresh = await fetch(request);
+  cache.put(request, fresh.clone());
+  return fresh;
 }
 
-async function audioStrategy(request) {
-  const cache = await caches.open(CACHE_AUDIO);
-  const cached = await cache.match(request);
-  if (cached) return cached;
-  try {
-    const response = await fetch(request);
-    if (response.ok) cache.put(request, response.clone());
-    return response;
-  } catch {
-    return new Response('Audio offline.', { status: 503 });
-  }
-}
-
+// komunikacja z aplikacją
 self.addEventListener('message', event => {
-  if (event.data === 'SKIP_WAITING') self.skipWaiting();
+  if (event.data === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
