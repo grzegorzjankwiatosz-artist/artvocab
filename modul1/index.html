@@ -1,1 +1,1178 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>ArtVocab — Oil Painting</title>
 
+<!-- PWA -->
+<link rel="manifest" href="../manifest.json">
+<meta name="theme-color" content="#5c3d2e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ArtVocab">
+<link rel="apple-touch-icon" href="../icon-512.png">
+
+<!-- Fonts — cached by SW for offline use -->
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream:#f8f4ed; --warm:#f2ebe0; --paper:#ede5d8;
+  --ink:#1c1812; --brown:#5c3d2e; --ochre:#c47e2a;
+  --ochre-l:#e8a44a; --rust:#a03820; --sage:#5a7a5c;
+  --muted:#8a7e72; --border:rgba(92,61,46,0.15);
+  --border2:rgba(92,61,46,0.28); --shadow:rgba(28,24,18,0.10);
+  --ff-h:'Playfair Display',serif; --ff-b:'Libre Baskerville',serif;
+  --ff-u:'Outfit',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--cream);color:var(--ink);font-family:var(--ff-b);min-height:100vh;overflow-x:hidden;}
+
+/* HEADER */
+.hdr{background:var(--brown);color:var(--cream);padding:40px 44px 36px;position:relative;overflow:hidden;}
+.hdr::after{content:'OIL';position:absolute;right:32px;bottom:-16px;font-family:var(--ff-h);font-size:160px;font-weight:700;color:rgba(255,255,255,0.04);letter-spacing:-0.04em;line-height:1;pointer-events:none;user-select:none;}
+.hdr-label{font-family:var(--ff-u);font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:rgba(248,244,237,.5);margin-bottom:10px;}
+.hdr-title{font-family:var(--ff-h);font-size:clamp(28px,5vw,52px);font-weight:700;line-height:1.05;margin-bottom:4px;}
+.hdr-title em{font-style:italic;color:var(--ochre-l);}
+.hdr-sub{font-family:var(--ff-b);font-style:italic;font-size:15px;color:rgba(248,244,237,.6);margin-bottom:24px;}
+
+/* PROGRESS STEPS */
+.steps{display:flex;gap:4px;align-items:center;flex-wrap:wrap;}
+.stp{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;}
+.stp-dot{width:34px;height:34px;border-radius:50%;border:2px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-family:var(--ff-u);font-size:13px;font-weight:600;color:rgba(255,255,255,.35);transition:all .25s;}
+.stp.done .stp-dot{background:var(--sage);border-color:var(--sage);color:#fff;}
+.stp.active .stp-dot{background:var(--ochre);border-color:var(--ochre-l);color:#fff;box-shadow:0 0 0 4px rgba(196,126,42,.25);}
+.stp-lbl{font-family:var(--ff-u);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.3);}
+.stp.active .stp-lbl{color:var(--ochre-l);}
+.stp.done .stp-lbl{color:rgba(255,255,255,.5);}
+.scon{width:28px;height:2px;background:rgba(255,255,255,.1);border-radius:1px;margin-bottom:18px;flex-shrink:0;}
+.scon.done{background:var(--sage);}
+
+/* MAIN */
+main{max-width:880px;margin:0 auto;padding:44px 32px 80px;}
+.stage{display:none;animation:stgIn .35s ease;}
+.stage.active{display:block;}
+@keyframes stgIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+.eye{font-family:var(--ff-u);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--ochre);margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+.eye::before{content:'';display:inline-block;width:22px;height:2px;background:var(--ochre);border-radius:1px;}
+.stg-title{font-family:var(--ff-h);font-size:clamp(26px,4vw,40px);font-weight:700;line-height:1.1;margin-bottom:8px;color:var(--brown);}
+.stg-desc{font-family:var(--ff-b);font-style:italic;font-size:15px;color:var(--muted);margin-bottom:32px;line-height:1.65;border-left:3px solid var(--ochre);padding-left:14px;}
+
+/* ── AUDIO UPLOAD WIDGET ── */
+.audio-widget{background:#fff;border:1px solid var(--border2);border-radius:8px;margin-bottom:28px;overflow:hidden;}
+.aw-head{background:var(--brown);color:var(--cream);padding:12px 18px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.aw-head-title{font-family:var(--ff-u);font-size:13px;font-weight:600;letter-spacing:.04em;}
+.aw-head-hint{font-family:var(--ff-u);font-size:10px;color:rgba(248,244,237,.55);margin-left:auto;}
+.aw-body{padding:14px 18px;}
+.aw-drop{border:2px dashed var(--border2);border-radius:6px;background:var(--warm);cursor:pointer;transition:all .2s;position:relative;display:flex;align-items:center;gap:14px;padding:14px 18px;}
+.aw-drop:hover,.aw-drop.drag{border-color:var(--ochre);background:rgba(196,126,42,.05);}
+.aw-drop input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.aw-drop-icon{font-size:26px;flex-shrink:0;}
+.aw-drop-texts{flex:1;}
+.aw-drop-main{font-family:var(--ff-u);font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--brown);}
+.aw-drop-sub{font-family:var(--ff-u);font-size:10px;color:var(--muted);margin-top:3px;line-height:1.5;}
+.aw-drop-kbd{display:inline-block;background:var(--paper);border:1px solid var(--border2);border-radius:3px;padding:1px 5px;font-family:var(--ff-u);font-size:9px;color:var(--brown);margin:0 1px;}
+.aw-status{margin-top:10px;padding:9px 13px;border-radius:4px;font-family:var(--ff-u);font-size:12px;display:none;align-items:center;gap:8px;}
+.aw-status.ok{background:rgba(90,122,92,.1);border:1px solid var(--sage);color:var(--sage);display:flex;}
+.aw-status.warn{background:rgba(196,126,42,.09);border:1px solid var(--ochre);color:var(--brown);display:flex;}
+.aw-list{margin-top:8px;display:flex;flex-direction:column;gap:5px;max-height:160px;overflow-y:auto;}
+.aw-item{display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--warm);border:1px solid var(--border);border-radius:4px;}
+.aw-item-play{background:none;border:1px solid var(--border2);border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);font-size:10px;transition:all .15s;flex-shrink:0;}
+.aw-item-play:hover{border-color:var(--ochre);color:var(--ochre);}
+.aw-item-name{font-family:var(--ff-u);font-size:11px;color:var(--ink);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.aw-item-match{font-family:var(--ff-u);font-size:9px;padding:2px 6px;border-radius:2px;background:rgba(90,122,92,.12);color:var(--sage);letter-spacing:.08em;text-transform:uppercase;flex-shrink:0;}
+.aw-item-nomatch{font-family:var(--ff-u);font-size:9px;padding:2px 6px;border-radius:2px;background:rgba(138,126,114,.1);color:var(--muted);letter-spacing:.06em;text-transform:uppercase;flex-shrink:0;}
+.aw-item-del{background:none;border:none;cursor:pointer;color:var(--muted);font-size:12px;padding:2px 4px;transition:color .15s;flex-shrink:0;}
+.aw-item-del:hover{color:var(--rust);}
+.aw-add-more{margin-top:6px;padding:6px 12px;border:1px solid var(--border2);border-radius:4px;background:none;font-family:var(--ff-u);font-size:10px;cursor:pointer;color:var(--muted);transition:all .18s;position:relative;display:inline-flex;align-items:center;gap:6px;}
+.aw-add-more input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.aw-add-more:hover{border-color:var(--ochre);color:var(--ochre);}
+
+/* ── STAGE 1 WORD CARDS ── */
+.words-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-bottom:32px;}
+.wcard{background:#fff;border:1px solid var(--border);border-radius:6px;padding:18px 18px 16px;transition:all .2s;position:relative;overflow:hidden;}
+.wcard::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:var(--ochre);transform:scaleY(0);transform-origin:bottom;transition:transform .25s;}
+.wcard:hover{box-shadow:0 4px 18px var(--shadow);transform:translateY(-2px);}
+.wcard:hover::before{transform:scaleY(1);}
+.wc-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;}
+.wc-num{font-family:var(--ff-u);font-size:10px;letter-spacing:.15em;color:var(--muted);text-transform:uppercase;}
+.wc-en{font-family:var(--ff-h);font-size:22px;font-weight:700;color:var(--brown);margin-bottom:3px;line-height:1.2;}
+.wc-pron{font-family:var(--ff-b);font-style:italic;font-size:12px;color:var(--ochre);margin-bottom:8px;}
+.wc-pl{font-family:var(--ff-u);font-size:12px;font-weight:600;color:var(--muted);padding:4px 8px;background:var(--paper);border-radius:3px;display:inline-block;margin-bottom:8px;}
+.wc-def-en{font-size:13px;color:var(--ink);line-height:1.55;margin-bottom:6px;}
+.wc-def-pl{font-size:12px;color:var(--muted);line-height:1.5;font-style:italic;border-top:1px solid var(--border);padding-top:6px;}
+.spk{background:none;border:1px solid var(--border);border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;color:var(--muted);transition:all .18s;flex-shrink:0;}
+.spk:hover{border-color:var(--ochre);color:var(--ochre);}
+.spk.sp{border-color:var(--ochre);color:var(--ochre);animation:spk .9s infinite;}
+@keyframes spk{0%,100%{box-shadow:0 0 0 0 rgba(196,126,42,.3)}50%{box-shadow:0 0 0 5px rgba(196,126,42,0)}}
+
+/* ── STAGE 2 FLASHCARDS ── */
+.fc-scene{perspective:1200px;width:100%;max-width:560px;height:320px;margin:0 auto 22px;cursor:pointer;}
+.fc3d{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform .5s cubic-bezier(.4,0,.2,1);}
+.fc3d.flipped{transform:rotateY(180deg);}
+.fc-face{position:absolute;inset:0;backface-visibility:hidden;border-radius:8px;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:28px 32px;text-align:center;border:1px solid var(--border2);}
+.fc-front{background:#fff;border-top:4px solid var(--ochre);box-shadow:0 4px 24px var(--shadow);}
+.fc-back{background:var(--brown);color:var(--cream);transform:rotateY(180deg);border-top:4px solid var(--ochre-l);}
+.fc-lbl{font-family:var(--ff-u);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;}
+.fc-back .fc-lbl{color:rgba(248,244,237,.4);}
+.fc-word{font-family:var(--ff-h);font-size:clamp(30px,5vw,48px);font-weight:700;color:var(--brown);margin-bottom:6px;line-height:1.1;}
+.fc-pron{font-style:italic;font-size:15px;color:var(--ochre);margin-bottom:6px;}
+.fc-pl-small{font-family:var(--ff-u);font-size:12px;color:var(--muted);}
+.fc-hint{font-family:var(--ff-u);font-size:10px;color:var(--muted);letter-spacing:.1em;margin-top:10px;}
+.fc-pl-back{font-family:var(--ff-u);font-size:13px;color:rgba(248,244,237,.6);margin-bottom:10px;}
+.fc-memory-en{font-family:var(--ff-h);font-style:italic;font-size:17px;color:var(--ochre-l);margin-bottom:6px;line-height:1.4;}
+.fc-memory-pl{font-family:var(--ff-u);font-size:13px;color:rgba(248,244,237,.7);margin-bottom:10px;line-height:1.4;}
+.fc-etym-en{font-size:12px;color:rgba(248,244,237,.45);line-height:1.5;margin-bottom:2px;}
+.fc-etym-pl{font-size:11px;color:rgba(248,244,237,.32);line-height:1.4;font-style:italic;}
+.fc-nav{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;}
+.fc-cnt{font-family:var(--ff-u);font-size:12px;color:var(--muted);min-width:56px;text-align:center;}
+
+/* ── STAGE 3 CONTEXT ── */
+.ctx-item{background:#fff;border:1px solid var(--border);border-radius:6px;margin-bottom:14px;overflow:hidden;}
+.ctx-head{padding:12px 18px;background:var(--warm);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.ctx-word{font-family:var(--ff-h);font-size:20px;font-weight:700;color:var(--brown);}
+.ctx-pl-badge{font-family:var(--ff-u);font-size:11px;color:var(--muted);background:var(--paper);padding:3px 8px;border-radius:3px;}
+.ctx-body{padding:0;}
+.ctx-row{display:grid;grid-template-columns:80px 1fr 1fr;gap:0;border-bottom:1px solid var(--border);}
+.ctx-row:last-child{border-bottom:none;}
+.ctx-tag-cell{padding:14px 10px 14px 16px;display:flex;align-items:flex-start;padding-top:16px;}
+.ctx-tag{font-family:var(--ff-u);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#fff;padding:3px 7px;border-radius:2px;white-space:nowrap;}
+.tag-d{background:var(--ochre);} .tag-t{background:var(--brown);} .tag-c{background:var(--sage);}
+.ctx-en{padding:14px 12px;font-size:14px;line-height:1.6;color:var(--ink);border-right:1px solid var(--border);}
+.ctx-pl-txt{padding:14px 12px;font-size:13px;line-height:1.6;color:var(--muted);font-style:italic;}
+.ctx-en strong{color:var(--brown);}
+.ctx-col-head{display:grid;grid-template-columns:80px 1fr 1fr;background:var(--paper);border-bottom:1px solid var(--border2);}
+.ctx-col-head div{padding:6px 12px;font-family:var(--ff-u);font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);}
+.ctx-col-head div:nth-child(2){border-right:1px solid var(--border);}
+
+/* ── STAGE 4 CONVERSATION ── */
+.conv-scene{background:#fff;border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:20px;}
+.conv-hdr{background:var(--brown);color:var(--cream);padding:12px 18px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.conv-title{font-family:var(--ff-u);font-size:13px;font-weight:600;letter-spacing:.04em;}
+.conv-tag{font-family:var(--ff-u);font-size:9px;letter-spacing:.14em;text-transform:uppercase;background:rgba(255,255,255,.12);padding:3px 7px;border-radius:2px;color:rgba(248,244,237,.75);}
+.conv-body{padding:20px;}
+.bubble{margin-bottom:18px;display:flex;flex-direction:column;gap:3px;}
+.bubble.right{align-items:flex-end;}
+.b-name{font-family:var(--ff-u);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:0 4px;}
+.b-wrap{max-width:85%;display:flex;flex-direction:column;gap:4px;}
+.bubble.right .b-wrap{align-items:flex-end;}
+.b-en{padding:11px 15px;border-radius:8px;font-size:14px;line-height:1.55;}
+.b-pl{padding:6px 15px;font-size:12px;line-height:1.5;font-style:italic;border-radius:4px;}
+.bubble.left .b-en{background:var(--warm);border:1px solid var(--border);border-bottom-left-radius:2px;}
+.bubble.left .b-pl{color:var(--muted);background:rgba(0,0,0,.03);border:1px solid var(--border);}
+.bubble.right .b-en{background:var(--brown);color:var(--cream);border-bottom-right-radius:2px;}
+.bubble.right .b-pl{color:var(--muted);background:rgba(92,61,46,.06);border:1px solid var(--border);text-align:right;}
+.b-en em{color:var(--ochre-l);font-style:normal;font-weight:600;}
+.bubble.left .b-en em{color:var(--rust);}
+.conv-vocab{background:var(--paper);border:1px solid var(--border);border-radius:6px;padding:14px 16px;margin-top:6px;}
+.cv-title{font-family:var(--ff-u);font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--ochre);margin-bottom:8px;}
+.chips{display:flex;flex-wrap:wrap;gap:7px;}
+.chip{background:#fff;border:1px solid var(--border2);border-radius:4px;padding:5px 10px;font-size:12px;display:flex;align-items:center;gap:5px;cursor:pointer;transition:all .18s;}
+.chip:hover{border-color:var(--ochre);background:rgba(196,126,42,.06);}
+.chip span{font-family:var(--ff-u);font-size:10px;color:var(--muted);}
+
+/* ── STAGE 5 QUIZ ── */
+.q-block{background:#fff;border:1px solid var(--border);border-radius:8px;margin-bottom:18px;overflow:hidden;}
+.q-top{padding:16px 18px 12px;border-bottom:1px solid var(--border);}
+.q-num{font-family:var(--ff-u);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}
+.q-badge{display:inline-block;font-family:var(--ff-u);font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:2px 7px;border-radius:2px;margin-bottom:7px;}
+.bmc{background:rgba(196,126,42,.1);color:var(--ochre);}
+.bfl{background:rgba(90,122,92,.1);color:var(--sage);}
+.bau{background:rgba(92,61,46,.09);color:var(--brown);}
+.bwr{background:rgba(160,56,32,.09);color:var(--rust);}
+.q-text{font-family:var(--ff-h);font-size:18px;font-weight:700;color:var(--brown);line-height:1.3;}
+.q-text em{font-style:italic;color:var(--ochre);}
+.q-text-pl{font-family:var(--ff-u);font-size:13px;color:var(--muted);margin-top:4px;font-style:italic;}
+.q-opts{padding:12px 14px;display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+.qo{padding:10px 13px;border:1px solid var(--border2);border-radius:4px;background:var(--warm);cursor:pointer;font-family:var(--ff-u);font-size:13px;color:var(--ink);transition:all .18s;display:flex;align-items:center;gap:7px;text-align:left;}
+.qo:hover:not(.locked){border-color:var(--ochre);background:rgba(196,126,42,.06);}
+.qo.ok{background:rgba(90,122,92,.14);border-color:var(--sage);color:var(--sage);}
+.qo.err{background:rgba(160,56,32,.11);border-color:var(--rust);color:var(--rust);}
+.qo.locked{cursor:default;}
+.ql{font-family:var(--ff-u);font-size:10px;font-weight:600;color:var(--muted);width:15px;flex-shrink:0;}
+.q-fill-row{padding:12px 18px;display:flex;gap:9px;}
+.qfi{flex:1;padding:9px 13px;border:1px solid var(--border2);border-radius:4px;background:var(--warm);font-family:var(--ff-b);font-size:15px;color:var(--ink);outline:none;transition:border-color .2s;}
+.qfi:focus{border-color:var(--ochre);}
+.qfi.ok{border-color:var(--sage);background:rgba(90,122,92,.07);}
+.qfi.err{border-color:var(--rust);background:rgba(160,56,32,.07);}
+.q-chk{padding:9px 18px;background:var(--ochre);border:none;border-radius:4px;cursor:pointer;font-family:var(--ff-u);font-size:13px;font-weight:600;color:#fff;transition:all .18s;}
+.q-chk:hover{background:var(--ochre-l);}
+.q-audio-row{padding:10px 18px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.q-write-row{padding:12px 18px 14px;}
+.qwi{width:100%;padding:11px 13px;border:1px solid var(--border2);border-radius:4px;background:var(--warm);font-family:var(--ff-b);font-size:14px;color:var(--ink);outline:none;resize:vertical;min-height:80px;transition:border-color .2s;}
+.qwi:focus{border-color:var(--ochre);}
+.q-fb{margin:0 14px 12px;padding:9px 13px;border-radius:4px;font-size:13px;line-height:1.5;display:none;font-family:var(--ff-u);}
+.q-fb.show{display:block;}
+.q-fb.ok{background:rgba(90,122,92,.11);border:1px solid var(--sage);color:var(--sage);}
+.q-fb.err{background:rgba(160,56,32,.09);border:1px solid var(--rust);color:var(--rust);}
+.q-fb.info{background:rgba(196,126,42,.09);border:1px solid var(--ochre);color:var(--brown);}
+.q-fb-pl{font-style:italic;color:inherit;opacity:.8;margin-top:4px;font-size:12px;}
+
+/* QUIZ SCOREBAR */
+.quiz-top-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:8px;}
+.qtb-prog{font-family:var(--ff-u);font-size:12px;color:var(--muted);}
+.qtb-scores{display:flex;gap:10px;}
+.sc-chip{padding:4px 11px;border-radius:3px;font-family:var(--ff-u);font-size:11px;letter-spacing:.06em;}
+.sc-ok{background:rgba(90,122,92,.15);border:1px solid var(--sage);color:var(--sage);}
+.sc-err{background:rgba(160,56,32,.12);border:1px solid var(--rust);color:var(--rust);}
+.qbar{height:3px;background:var(--border);border-radius:2px;margin-bottom:28px;overflow:hidden;}
+.qbar-fill{height:100%;background:var(--ochre);border-radius:2px;transition:width .4s;}
+
+/* RESULTS */
+.res-panel{text-align:center;padding:56px 20px;animation:stgIn .5s ease;}
+.res-grade{font-family:var(--ff-h);font-size:96px;font-weight:700;line-height:1;margin-bottom:4px;}
+.rga{color:var(--sage);} .rgb{color:var(--ochre);} .rgc{color:var(--rust);}
+.res-msg{font-family:var(--ff-b);font-style:italic;font-size:18px;color:var(--muted);margin-bottom:8px;}
+.res-msg-pl{font-family:var(--ff-u);font-size:13px;color:var(--muted);margin-bottom:28px;}
+.res-stats{display:flex;justify-content:center;gap:40px;margin-bottom:36px;flex-wrap:wrap;}
+.rs{display:flex;flex-direction:column;gap:3px;align-items:center;}
+.rs-v{font-family:var(--ff-h);font-size:44px;font-weight:700;color:var(--brown);}
+.rs-l{font-family:var(--ff-u);font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);}
+
+/* BUTTONS */
+.nav-btn{padding:10px 20px;border:1px solid var(--border2);border-radius:4px;background:none;font-family:var(--ff-u);font-size:13px;font-weight:500;cursor:pointer;color:var(--brown);transition:all .18s;}
+.nav-btn:hover{background:var(--brown);color:var(--cream);}
+.nav-btn.pri{background:var(--ochre);border-color:var(--ochre);color:#fff;}
+.nav-btn.pri:hover{background:var(--ochre-l);}
+.stg-nav{display:flex;gap:10px;justify-content:flex-end;margin-top:36px;padding-top:20px;border-top:1px solid var(--border);flex-wrap:wrap;}
+
+/* ── OFFLINE BANNER ── */
+.offline-bar{position:fixed;top:0;left:0;right:0;z-index:9999;padding:10px 20px;background:#a03820;color:#fff;font-family:var(--ff-u);font-size:12px;text-align:center;letter-spacing:.06em;transform:translateY(-100%);transition:transform .3s ease;display:flex;align-items:center;justify-content:center;gap:8px;}
+.offline-bar.show{transform:translateY(0);}
+.online-bar{background:var(--sage);}
+
+/* ── INSTALL BANNER ── */
+.install-bar{position:fixed;bottom:0;left:0;right:0;z-index:9998;padding:14px 20px;background:var(--brown);color:var(--cream);font-family:var(--ff-u);font-size:13px;display:none;align-items:center;gap:12px;flex-wrap:wrap;box-shadow:0 -4px 20px rgba(0,0,0,.2);}
+.install-bar.show{display:flex;}
+.install-bar-text{flex:1;}
+.install-bar-title{font-weight:600;margin-bottom:2px;}
+.install-bar-sub{font-size:11px;opacity:.7;}
+.install-btn{padding:8px 18px;background:var(--ochre);border:none;border-radius:4px;color:#fff;font-family:var(--ff-u);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;}
+.install-dismiss{background:none;border:none;color:rgba(248,244,237,.5);font-size:18px;cursor:pointer;padding:4px;}
+
+/* safe area for notched phones */
+body{padding-bottom:env(safe-area-inset-bottom);}
+
+/* RESPONSIVE */
+@media(max-width:640px){
+  .hdr{padding:28px 18px 24px;}
+  main{padding:28px 14px 60px;}
+  .words-grid{grid-template-columns:1fr;}
+  .q-opts{grid-template-columns:1fr;}
+  .ctx-row{grid-template-columns:70px 1fr;}
+  .ctx-pl-txt{display:none;}
+  .ctx-col-head div:last-child{display:none;}
+  .scon{display:none;}
+}
+
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-label"><a href="../index.html" style="color:rgba(248,244,237,.5);text-decoration:none;font-family:var(--ff-u);font-size:11px;letter-spacing:.15em;">← POWRÓT DO MENU</a></div>
+  <div class="hdr-title">Oil Painting — <em>Materials & Tools</em></div>
+  <div class="hdr-sub">Malarstwo olejne — Materiały i Narzędzia</div>
+  <div class="steps" id="stepsBar">
+    <div class="stp active" data-s="1" onclick="goStage(1)"><div class="stp-dot">①</div><div class="stp-lbl">Słowa</div></div>
+    <div class="scon" id="sc1"></div>
+    <div class="stp" data-s="2" onclick="goStage(2)"><div class="stp-dot">②</div><div class="stp-lbl">Fiszki</div></div>
+    <div class="scon" id="sc2"></div>
+    <div class="stp" data-s="3" onclick="goStage(3)"><div class="stp-dot">③</div><div class="stp-lbl">Kontekst</div></div>
+    <div class="scon" id="sc3"></div>
+    <div class="stp" data-s="4" onclick="goStage(4)"><div class="stp-dot">④</div><div class="stp-lbl">Rozmowa</div></div>
+    <div class="scon" id="sc4"></div>
+    <div class="stp" data-s="5" onclick="goStage(5)"><div class="stp-dot">⑤</div><div class="stp-lbl">Quiz</div></div>
+  </div>
+</div>
+
+<main>
+
+<!-- ══ STAGE 1 ══ -->
+<div class="stage active" id="stage1">
+  <div class="eye">Etap 1 · Introduction</div>
+  <div class="stg-title">12 kluczowych słów</div>
+  <div class="stg-desc">Poznaj podstawowe słownictwo malarstwa olejnego. Kliknij 🔊 przy słowie — usłyszysz angielską wymowę (syntezator) lub Twoje własne nagranie MP3, jeśli je wgrasz poniżej.</div>
+
+  <div class="audio-widget">
+    <div class="aw-head">
+      <span>🎵</span>
+      <span class="aw-head-title">Wgraj pliki MP3 z wymową</span>
+      <span class="aw-head-hint">Nazwa pliku = angielskie słowo, np. canvas.mp3</span>
+    </div>
+    <div class="aw-body">
+      <div class="aw-drop" id="awDrop1">
+        <input type="file" accept=".mp3,audio/*" multiple onchange="handleUpload(this.files,'1')">
+        <div class="aw-drop-icon">🎧</div>
+        <div class="aw-drop-texts">
+          <div class="aw-drop-main">Kliknij i zaznacz pliki MP3</div>
+          <div class="aw-drop-sub">
+            Zaznacz wszystkie naraz: <span class="aw-drop-kbd">Ctrl</span>+<span class="aw-drop-kbd">A</span> lub <span class="aw-drop-kbd">Ctrl</span>+klik<br>
+            canvas.mp3 · easel.mp3 · gesso.mp3 · palette.mp3 · linseed-oil.mp3 …
+          </div>
+        </div>
+      </div>
+      <div class="aw-status" id="awStatus1"></div>
+      <div class="aw-list" id="awList1"></div>
+    </div>
+  </div>
+
+  <div class="words-grid" id="wordsGrid"></div>
+
+  <div class="stg-nav">
+    <button class="nav-btn pri" onclick="goStage(2)">Przejdź do fiszek →</button>
+  </div>
+</div>
+
+<!-- ══ STAGE 2 ══ -->
+<div class="stage" id="stage2">
+  <div class="eye">Etap 2 · Memorisation</div>
+  <div class="stg-title">Fiszki ze skojarzeniami</div>
+  <div class="stg-desc">Na odwrocie każdej karty: skojarzenie pamięciowe i etymologia — po angielsku i po polsku. Kliknij kartę, aby odwrócić.</div>
+
+  <div class="fc-scene" onclick="flipFC()" id="fcWrap">
+    <div class="fc3d" id="fc3d">
+      <div class="fc-face fc-front">
+        <div class="fc-lbl">Słowo angielskie · English word</div>
+        <div class="fc-word" id="fcWord"></div>
+        <div class="fc-pron" id="fcPron"></div>
+        <div class="fc-pl-small" id="fcPlSmall"></div>
+        <div class="fc-hint">kliknij, aby zobaczyć skojarzenie →</div>
+      </div>
+      <div class="fc-face fc-back">
+        <div class="fc-lbl">Skojarzenie · Association</div>
+        <div class="fc-pl-back" id="fcPlBack"></div>
+        <div class="fc-memory-en" id="fcMemEn"></div>
+        <div class="fc-memory-pl" id="fcMemPl"></div>
+        <div class="fc-etym-en" id="fcEtymEn"></div>
+        <div class="fc-etym-pl" id="fcEtymPl"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="fc-nav">
+    <button class="nav-btn" onclick="fcMove(-1)">← Poprzednia</button>
+    <button class="spk" id="fcSpk" onclick="speakWord(WORDS[fcIdx].en,document.getElementById('fcSpk'));event.stopPropagation()">🔊</button>
+    <span class="fc-cnt" id="fcCnt"></span>
+    <button class="nav-btn pri" onclick="fcMove(1)">Następna →</button>
+  </div>
+
+  <div class="stg-nav">
+    <button class="nav-btn" onclick="goStage(1)">← Wróć</button>
+    <button class="nav-btn pri" onclick="goStage(3)">Słowa w kontekście →</button>
+  </div>
+</div>
+
+<!-- ══ STAGE 3 ══ -->
+<div class="stage" id="stage3">
+  <div class="eye">Etap 3 · Words in Context</div>
+  <div class="stg-title">Słowa w zdaniach</div>
+  <div class="stg-desc">Każde słowo w trzech kontekstach: opis techniki, opis własnej pracy, rozmowa z klientem — po angielsku i po polsku obok siebie.</div>
+  <div id="ctxList"></div>
+  <div class="stg-nav">
+    <button class="nav-btn" onclick="goStage(2)">← Wróć</button>
+    <button class="nav-btn pri" onclick="goStage(4)">Mini-konwersacje →</button>
+  </div>
+</div>
+
+<!-- ══ STAGE 4 ══ -->
+<div class="stage" id="stage4">
+  <div class="eye">Etap 4 · Conversation</div>
+  <div class="stg-title">Mini-konwersacje</div>
+  <div class="stg-desc">Dwa realistyczne dialogi: w pracowni i ze sprzedażą obrazu. Każda kwestia po angielsku i po polsku. Słowa z modułu wyróżnione kolorem. Wgraj MP3 rozmów lub użyj syntezatora mowy 🔊.</div>
+
+  <div class="audio-widget">
+    <div class="aw-head">
+      <span>🎵</span>
+      <span class="aw-head-title">Wgraj nagrania dialogów MP3</span>
+      <span class="aw-head-hint">np. dialog1.mp3 · dialog2.mp3</span>
+    </div>
+    <div class="aw-body">
+      <div class="aw-drop" id="awDrop2">
+        <input type="file" accept=".mp3,audio/*" multiple onchange="handleUpload(this.files,'2')">
+        <div class="aw-drop-icon">🎙</div>
+        <div class="aw-drop-texts">
+          <div class="aw-drop-main">Kliknij i zaznacz pliki MP3 z dialogami</div>
+          <div class="aw-drop-sub">
+            Zaznacz wszystkie naraz: <span class="aw-drop-kbd">Ctrl</span>+<span class="aw-drop-kbd">A</span><br>
+            dialog1.mp3 · dialog2.mp3 lub osobne pliki dla każdej kwestii
+          </div>
+        </div>
+      </div>
+      <div class="aw-status" id="awStatus2"></div>
+      <div class="aw-list" id="awList2"></div>
+    </div>
+  </div>
+
+  <div class="conv-scene" id="conv1"></div>
+  <div class="conv-scene" id="conv2"></div>
+
+  <div class="stg-nav">
+    <button class="nav-btn" onclick="goStage(3)">← Wróć</button>
+    <button class="nav-btn pri" onclick="goStage(5)">Quiz sprawdzający →</button>
+  </div>
+</div>
+
+<!-- ══ STAGE 5 ══ -->
+<div class="stage" id="stage5">
+  <div class="eye">Etap 5 · Test Yourself</div>
+  <div class="stg-title">Quiz sprawdzający</div>
+  <div class="stg-desc">8 pytań czterech typów: wybór wielokrotny, uzupełnianie luk, słuchanie i zadanie otwarte. Pytania i odpowiedzi są dwujęzyczne.</div>
+
+  <div class="quiz-top-bar">
+    <div class="qtb-prog" id="qtbProg">Pytanie 1 z 8</div>
+    <div class="qtb-scores">
+      <span class="sc-chip sc-ok" id="scOk">✓ 0</span>
+      <span class="sc-chip sc-err" id="scErr">✗ 0</span>
+    </div>
+  </div>
+  <div class="qbar"><div class="qbar-fill" id="qbarFill" style="width:0%"></div></div>
+
+  <div id="quizBlocks"></div>
+  <div id="resPanel" style="display:none"></div>
+
+  <div class="stg-nav" id="quizNavBar">
+    <button class="nav-btn" onclick="goStage(4)">← Konwersacja</button>
+    <button class="nav-btn pri" id="finishBtn" onclick="finishQuiz()" style="display:none">Sprawdź wyniki →</button>
+  </div>
+</div>
+
+</main>
+
+<script>
+// ══════════════════ DATA ══════════════════
+const WORDS = [
+  {en:'canvas',pl:'płótno',pron:'/ˈkænvəs/',
+   defEn:'The woven fabric surface, usually linen or cotton, stretched over a wooden frame for painting.',
+   defPl:'Tkanina (zwykle len lub bawełna) naciągnięta na drewnianą ramę, służąca jako podłoże malarskie.',
+   memEn:'"Canvas" rhymes with "plan us" — it\'s where your plan becomes a reality.',
+   memPl:'"Canvas" rymuje się z "plan us" — tu Twój plan staje się rzeczywistością.',
+   etymEn:'From Latin "cannabis" (hemp) — canvas was originally made from hemp fibre.',
+   etymPl:'Z łacińskiego "cannabis" (konopie) — pierwotnie płótna tkano z włókien konopnych.'},
+  {en:'easel',pl:'sztaluga',pron:'/ˈiːzəl/',
+   defEn:'A freestanding frame that holds the canvas upright while you paint.',
+   defPl:'Wolnostojąca konstrukcja, która trzyma płótno w pionie podczas malowania.',
+   memEn:'An EASEL makes painting EASY — "eas-el" sounds like "easy".',
+   memPl:'EASEL sprawia, że malowanie jest EASY (łatwe) — brzmi podobnie!',
+   etymEn:'From Dutch "ezel" meaning donkey — it carries your work like a beast of burden.',
+   etymPl:'Z niderlandzkiego "ezel" = osioł — nosi Twoją pracę jak zwierzę juczne.'},
+  {en:'palette',pl:'paleta',pron:'/ˈpælɪt/',
+   defEn:'A flat surface — usually wood, glass or plastic — on which an artist mixes colours.',
+   defPl:'Płaska powierzchnia (zwykle drewno, szkło lub plastik), na której artysta miesza kolory.',
+   memEn:'A PALETTE holds your palette of colours — same spelling for the object and the colour range!',
+   memPl:'PALETTE = zarówno przedmiot, jak i zakres kolorów — jedno słowo, dwa znaczenia!',
+   etymEn:'French "palette", diminutive of "pale" (blade) — a small, flat, blade-like surface.',
+   etymPl:'Francuski "palette" — zdrobnienie od "pale" (łopatka), czyli mała płaska płytka.'},
+  {en:'palette knife',pl:'nóż paletowy',pron:'/ˈpælɪt naɪf/',
+   defEn:'A flexible metal blade used to mix paint or apply thick paint directly to the canvas.',
+   defPl:'Elastyczna metalowa szpachla do mieszania farb lub nakładania grubej warstwy bezpośrednio na płótno.',
+   memEn:'It\'s literally a knife for the palette. When used on canvas it creates bold impasto texture.',
+   memPl:'Dosłownie: nóż do palety. Na płótnie tworzy wyraźną, fakturową powierzchnię.',
+   etymEn:'A tool born in the Flemish studios of the 17th century, used both for mixing and painting.',
+   etymPl:'Narzędzie wywodzące się z flamandzkich pracowni XVII wieku — do mieszania i malowania.'},
+  {en:'linseed oil',pl:'olej lniany',pron:'/ˈlɪnsiːd ɔɪl/',
+   defEn:'A drying oil from flax seeds, used as a binder and medium in oil painting.',
+   defPl:'Schnący olej z nasion lnu, używany jako spoiwo i medium w malarstwie olejnym.',
+   memEn:'"Lin" = linen = flax plant. Linseed = seeds of the linen (flax) plant.',
+   memPl:'"Lin" = len. Linseed = nasiona rośliny lnianej. Len → płótno → olej lniany!',
+   etymEn:'Old English "līnsǣd" — linen-seed. "Linen" and "linseed" share the same ancient root.',
+   etymPl:'Staroangielski "līnsǣd" — nasiona lnu. "Linen" i "linseed" mają ten sam rdzeń.'},
+  {en:'gesso',pl:'grunt / podkład',pron:'/ˈdʒɛsəʊ/',
+   defEn:'A white primer applied to canvas before painting to create a smooth, absorbent surface.',
+   defPl:'Biały podkład nakładany na płótno przed malowaniem — tworzy gładką, chłonną powierzchnię.',
+   memEn:'"Gesso" sounds like "guess-o" — you lay down the white base before guessing what to paint.',
+   memPl:'"Gesso" brzmi jak "dżessou" — kładziesz białą bazę, zanim zaczniesz "zgadywać" obraz.',
+   etymEn:'Italian "gesso" = plaster or chalk. Traditional gesso was chalk mixed with animal glue.',
+   etymPl:'Włoskie "gesso" = gips lub kreda. Tradycyjny gesso to kreda z klejem kostnym.'},
+  {en:'turpentine',pl:'terpentyna',pron:'/ˈtɜːpəntaɪn/',
+   defEn:'A solvent distilled from pine resin, used to thin oil paints and clean brushes.',
+   defPl:'Rozcieńczalnik z żywicy sosnowej — do rozcieńczania farb olejnych i czyszczenia pędzli.',
+   memEn:'"Turp" sounds like "burp" — the sharp smell is enough to make you react!',
+   memPl:'"Terp-" jak "terpieć" — ostrym zapachem daje się we znaki!',
+   etymEn:'From Greek "terebinthos" — the turpentine tree. Known since ancient Greece.',
+   etymPl:'Z greckiego "terebinthos" — drzewo terpentynowe. Znane od starożytnej Grecji.'},
+  {en:'medium',pl:'medium malarskie',pron:'/ˈmiːdiəm/',
+   defEn:'Any liquid mixed with paint to change its consistency, drying time or finish.',
+   defPl:'Każdy płyn dodawany do farby, by zmienić jej konsystencję, czas schnięcia lub wykończenie.',
+   memEn:'A MEDIUM is the middle ground — it mediates between pure pigment and the canvas.',
+   memPl:'MEDIUM = środek, pośrednik — stoi między czystym pigmentem a płótnem.',
+   etymEn:'Latin "medium" = middle. It sits between the pure pigment and the painted surface.',
+   etymPl:'Łacińskie "medium" = środek. Pośredniczy między pigmentem a powierzchnią obrazu.'},
+  {en:'varnish',pl:'werniks',pron:'/ˈvɑːnɪʃ/',
+   defEn:'A transparent protective coating applied over a finished painting to protect and unify the surface.',
+   defPl:'Przezroczysta powłoka ochronna nakładana na gotowy obraz — chroni i ujednolica powierzchnię.',
+   memEn:'"Var-NISH" — it gives the painting a nice FINISH. The last step!',
+   memPl:'"Werniks" — od niego obraz wygląda "wernisażowo"! Ostatni krok ochrony.',
+   etymEn:'From Medieval Latin "veronix" — possibly named after the city of Berenice in Libya.',
+   etymPl:'Ze średniowiecznej łaciny "veronix" — prawdopodobnie od nazwy miasta Berenice w Libii.'},
+  {en:'pigment',pl:'pigment',pron:'/ˈpɪɡmənt/',
+   defEn:'The dry colouring substance — powder, mineral or synthetic — that gives paint its colour.',
+   defPl:'Sucha substancja barwiąca (proszek, minerał lub syntetyczna), nadająca farbie kolor.',
+   memEn:'PIGment — imagine a pig rolling in colourful mud. That mud is raw pigment!',
+   memPl:'PIGment — wyobraź sobie świnię tarzającą się w kolorowym błocie. To surowy pigment!',
+   etymEn:'Latin "pigmentum" from "pingere" (to paint). Shares its root with the word "picture".',
+   etymPl:'Łacińskie "pigmentum" od "pingere" (malować). Ten sam rdzeń co angielskie "picture".'},
+  {en:'bristle brush',pl:'pędzel szczecinowy',pron:'/ˈbrɪsəl brʌʃ/',
+   defEn:'A stiff-haired brush made from hog bristles, ideal for heavy oil paint and creating texture.',
+   defPl:'Twardy pędzel ze szczeciny (włosia dzika), idealny do grubych farb olejnych i faktury.',
+   memEn:'BRISTLE = stiff, scratchy hair. Run your hand across a hedgehog — those are bristles!',
+   memPl:'BRISTLE = twarde, kolczaste włosie. Jak jeż — to są szczeciny!',
+   etymEn:'"Bristle" from Old English "byrst" — stiff animal hair, particularly from hogs.',
+   etymPl:'Staroangielskie "byrst" — twarde włosie zwierzęce, szczególnie z dzika.'},
+  {en:'solvent',pl:'rozcieńczalnik',pron:'/ˈsɒlvənt/',
+   defEn:'A liquid used to thin oil paint or dissolve dried paint from brushes and surfaces.',
+   defPl:'Płyn do rozcieńczania farby olejnej lub rozpuszczania zaschniętej farby z pędzli i powierzchni.',
+   memEn:'A SOLVENT SOLVES the problem of thick paint — it solves = dissolves.',
+   memPl:'SOLVENT rozwiązuje (solves) problem gęstej farby — rozpuszcza ją!',
+   etymEn:'Latin "solvere" = to loosen, release. It releases paint from surfaces and brushes.',
+   etymPl:'Łacińskie "solvere" = rozluźnić, uwolnić. Uwalnia farbę od pędzli i powierzchni.'},
+];
+
+const CONTEXT = [
+  {en:'canvas',pl:'płótno',rows:[
+    {tag:'d',en:'A <strong>canvas</strong> is a woven fabric — usually linen or cotton — stretched tightly over a wooden frame called a stretcher bar.',pl:'<strong>Płótno</strong> to tkana tkanina — zwykle len lub bawełna — naciągnięta na drewnianą ramę zwaną krosnem.'},
+    {tag:'t',en:'I always work on a <strong>linen canvas</strong> because it has a beautiful texture and is more durable than cotton.',pl:'Zawsze pracuję na <strong>płótnie lnianym</strong>, bo ma piękną fakturę i jest trwalsze od bawełny.'},
+    {tag:'c',en:'This painting is oil on <strong>canvas</strong>, primed with two layers of <strong>gesso</strong>. It will last for centuries.',pl:'To obraz olejny na <strong>płótnie</strong>, zagruntowany dwoma warstwami <strong>gesso</strong>. Przetrwa wieki.'},
+  ]},
+  {en:'gesso',pl:'grunt / podkład',rows:[
+    {tag:'d',en:'<strong>Gesso</strong> is a mixture of chalk, pigment and binder applied to a surface before painting to improve adhesion.',pl:'<strong>Gesso</strong> to mieszanka kredy, pigmentu i spoiwa nakładana przed malowaniem, aby poprawić przyczepność farby.'},
+    {tag:'t',en:'I apply three thin coats of <strong>gesso</strong>, sanding lightly between each layer for a perfectly smooth surface.',pl:'Nakładam trzy cienkie warstwy <strong>gruntu</strong>, lekko szlifując między nimi, żeby uzyskać idealnie gładką powierzchnię.'},
+    {tag:'c',en:'The <strong>canvas</strong> was prepared with <strong>gesso</strong> — that\'s the white primer visible at the edges. It ensures the paint bonds properly.',pl:'Płótno zagruntowano <strong>gesso</strong> — to biały podkład widoczny przy krawędziach. Zapewnia dobre wiązanie farby.'},
+  ]},
+  {en:'linseed oil',pl:'olej lniany',rows:[
+    {tag:'d',en:'<strong>Linseed oil</strong> is the most common drying oil in oil painting. It slows drying and allows extended blending time.',pl:'<strong>Olej lniany</strong> jest najczęstszym olejem schnącym w malarstwie olejnym. Spowalnia schnięcie i przedłuża czas mieszania.'},
+    {tag:'t',en:'For early layers I use very little <strong>linseed oil</strong> — keeping the paint lean. Later I add more for luminous glazes.',pl:'W pierwszych warstwach używam bardzo mało <strong>oleju lnianego</strong> — farba musi być "chuda". Potem dodaję go więcej do lazur.'},
+    {tag:'c',en:'I used <strong>linseed oil</strong> as the medium — it gives that warm, slightly amber tone and a beautiful surface quality.',pl:'Użyłem <strong>oleju lnianego</strong> jako medium — daje ciepły, lekko bursztynowy ton i piękną jakość powierzchni.'},
+  ]},
+  {en:'palette knife',pl:'nóż paletowy',rows:[
+    {tag:'d',en:'A <strong>palette knife</strong> has a long, flexible, offset blade used to mix colours or apply thick paint directly to the canvas.',pl:'<strong>Nóż paletowy</strong> ma długie, elastyczne, wygięte ostrze do mieszania kolorów lub nakładania grubej farby na płótno.'},
+    {tag:'t',en:'In this series I work almost entirely with a <strong>palette knife</strong>. I love the sculptural texture it creates.',pl:'W tej serii pracuję prawie wyłącznie <strong>nożem paletowym</strong>. Uwielbiam rzeźbiarską fakturę, jaką tworzy.'},
+    {tag:'c',en:'These thick ridges were applied with a <strong>palette knife</strong>, not a brush. That\'s why the texture is so expressive.',pl:'Te grube wypukłości nałożono <strong>nożem paletowym</strong>, nie pędzlem. Dlatego faktura jest tak wyrazista.'},
+  ]},
+  {en:'varnish',pl:'werniks',rows:[
+    {tag:'d',en:'<strong>Varnish</strong> is applied to a fully dry oil painting to protect it from dust and UV, and to unify the surface sheen.',pl:'<strong>Werniks</strong> nakłada się na całkowicie suchy obraz olejny, by chronić go przed kurzem i UV oraz ujednolicić połysk.'},
+    {tag:'t',en:'I always use removable damar <strong>varnish</strong>. It can be replaced in future without damaging the paint layer.',pl:'Zawsze używam usuwalnego <strong>werniksu</strong> damarowego. Można go wymienić w przyszłości bez uszkodzenia warstwy malarskiej.'},
+    {tag:'c',en:'The painting has been <strong>varnished</strong>, so it\'s protected. A conservator can safely remove the <strong>varnish</strong> if needed.',pl:'Obraz jest <strong>wernizowany</strong>, więc jest chroniony. Konserwator może bezpiecznie usunąć <strong>werniks</strong> w razie potrzeby.'},
+  ]},
+];
+
+const DIALOG1 = {
+  title:'W pracowni malarskiej',
+  titleEn:'In the Painting Studio',
+  tag:'Studio Scene',
+  id:'dialog1',
+  lines:[
+    {side:'left',name:'Asystent / Assistant',
+     en:'Good morning! Are you starting a new painting today?',
+     pl:'Dzień dobry! Czy zaczynasz dziś nowy obraz?'},
+    {side:'right',name:'Ty / You',
+     en:'Yes! First I need to prepare the <em>canvas</em>. I\'m going to apply two coats of <em>gesso</em> before I start.',
+     pl:'Tak! Najpierw muszę przygotować <em>płótno</em>. Nałożę dwie warstwy <em>gruntu</em> przed rozpoczęciem.'},
+    {side:'left',name:'Asystent',
+     en:'Which <em>medium</em> are you using — <em>linseed oil</em> or stand oil?',
+     pl:'Jakiego <em>medium</em> używasz — <em>oleju lnianego</em> czy oleju polimeryzowanego?'},
+    {side:'right',name:'Ty',
+     en:'I\'ll use <em>linseed oil</em> for early layers and switch to stand oil for final glazes. I also need my <em>palette knife</em> — I want to build texture with <em>impasto</em>.',
+     pl:'Użyję <em>oleju lnianego</em> w pierwszych warstwach, a do końcowych lazur przejdę na olej polimeryzowany. Potrzebuję też <em>noża paletowego</em> — chcę zbudować fakturę <em>impastem</em>.'},
+    {side:'left',name:'Asystent',
+     en:'Don\'t forget to use <em>turpentine</em> to clean your brushes afterwards!',
+     pl:'Nie zapomnij użyć <em>terpentyny</em> do czyszczenia pędzli!'},
+    {side:'right',name:'Ty',
+     en:'Of course. I already have my <em>solvent</em> ready on the <em>easel</em> tray.',
+     pl:'Oczywiście. Mój <em>rozcieńczalnik</em> już czeka na tacce <em>sztalugi</em>.'},
+  ],
+  chips:['canvas · płótno','easel · sztaluga','gesso · grunt','linseed oil · olej lniany','palette knife · nóż paletowy','turpentine · terpentyna','solvent · rozcieńczalnik'],
+};
+
+const DIALOG2 = {
+  title:'Rozmowa z klientem',
+  titleEn:'Talking with a Client',
+  tag:'Client Meeting',
+  id:'dialog2',
+  lines:[
+    {side:'left',name:'Klient / Client',
+     en:'This painting is beautiful. What technique did you use?',
+     pl:'Ten obraz jest piękny. Jakiej techniki użyłeś?'},
+    {side:'right',name:'Ty / You',
+     en:'Thank you! It\'s <em>oil paint</em> on <em>linen canvas</em>. I built up the layers slowly — first an underpainting, then colour gradually.',
+     pl:'Dziękuję! To <em>farba olejna</em> na <em>płótnie lnianym</em>. Budowałem warstwy powoli — najpierw <em>podmalówka</em>, potem stopniowe nakładanie koloru.'},
+    {side:'left',name:'Klient',
+     en:'How long did it take to dry?',
+     pl:'Jak długo schnął?'},
+    {side:'right',name:'Ty',
+     en:'<em>Oil paint</em> dries slowly — each layer needs at least a week. I used <em>linseed oil</em> as the <em>medium</em>, which gives a beautiful, slightly glossy finish.',
+     pl:'<em>Farba olejna</em> schnie powoli — każda warstwa potrzebuje przynajmniej tygodnia. Użyłem <em>oleju lnianego</em> jako <em>medium</em> — daje piękne, lekko błyszczące wykończenie.'},
+    {side:'left',name:'Klient',
+     en:'Will it last a long time?',
+     pl:'Czy przetrwa długo?'},
+    {side:'right',name:'Ty',
+     en:'Absolutely. <em>Oil paintings</em> on <em>canvas</em> with proper <em>varnish</em> can last hundreds of years. This is archival quality.',
+     pl:'Zdecydowanie. <em>Obrazy olejne</em> na <em>płótnie</em> z odpowiednim <em>wernisem</em> mogą przetrwać setki lat. To jakość archiwalna.'},
+  ],
+  chips:['It\'s oil paint on linen canvas · To farba olejna na płótnie lnianym','I built up the layers slowly · Budowałem warstwy powoli','archival quality · jakość archiwalna','each layer needs at least a week · każda warstwa potrzebuje tygodnia'],
+};
+
+const QUIZ = [
+  {type:'mc',
+   qEn:'What is a <em>canvas</em> in oil painting?',
+   qPl:'Czym jest <em>canvas</em> w malarstwie olejnym?',
+   opts:['A metal frame for holding paint / Metalowa rama do trzymania farby','A woven fabric surface stretched over a frame / Tkana tkanina naciągnięta na ramę','A type of stiff brush / Rodzaj twardego pędzla','A liquid used to thin paint / Płyn do rozcieńczania farby'],
+   ans:1,
+   fbEn:'Correct! A canvas is a woven fabric — usually linen or cotton — stretched over a wooden frame.',
+   fbPl:'Brawo! Canvas (płótno) to tkanina — zwykle lniana lub bawełniana — naciągnięta na drewnianą ramę.'},
+  {type:'mc',
+   qEn:'Which liquid is used to thin oil paint and clean brushes?',
+   qPl:'Który płyn służy do rozcieńczania farby olejnej i czyszczenia pędzli?',
+   opts:['Linseed oil / Olej lniany','Gesso / Grunt','Turpentine / Terpentyna','Varnish / Werniks'],
+   ans:2,
+   fbEn:'Correct! Turpentine (terpentyna) is the classic solvent for thinning oil paint and cleaning brushes.',
+   fbPl:'Poprawnie! Terpentyna to klasyczny rozcieńczalnik do farb olejnych i czyszczenia pędzli.'},
+  {type:'fill',
+   qEn:'Complete the sentence: "I applied two coats of ________ to prime the canvas before painting."',
+   qPl:'Uzupełnij: "Nałożyłem dwie warstwy ________ jako podkład na płótno przed malowaniem."',
+   ans:'gesso',
+   fbEn:'Correct! Gesso is the white primer applied to canvas before oil painting begins.',
+   fbPl:'Poprawnie! Gesso (grunt) to biały podkład nakładany na płótno przed malowaniem olejnym.'},
+  {type:'mc',
+   qEn:'A painter says: "I use a <em>palette knife</em> to build up thick texture." What technique is this?',
+   qPl:'Malarz mówi: "Używam <em>noża paletowego</em> do budowania grubej faktury." Jak nazywa się ta technika?',
+   opts:['Glazing / Lazurowanie','Sfumato / Sfumato','Impasto / Impast','Scumbling / Scumbling'],
+   ans:2,
+   fbEn:'Exactly! Impasto is the technique of applying thick, textured paint — often with a palette knife.',
+   fbPl:'Właśnie! Impast to technika nakładania grubej farby z wyraźną fakturą — często nożem paletowym.'},
+  {type:'fill',
+   qEn:'Fill in: "I mixed the colours with ________ oil as the medium for a slow-drying, glossy finish."',
+   qPl:'Uzupełnij: "Mieszałem kolory z olejem ________ jako medium dla wolno schnącego, błyszczącego wykończenia."',
+   ans:'linseed',
+   fbEn:'Correct! Linseed oil (olej lniany) is the most common painting medium in oil painting.',
+   fbPl:'Poprawnie! Olej lniany (linseed oil) to najczęstsze medium w malarstwie olejnym.'},
+  {type:'mc',
+   qEn:'When should a painter apply <em>varnish</em> to a finished oil painting?',
+   qPl:'Kiedy malarz powinien nałożyć <em>werniks</em> na gotowy obraz olejny?',
+   opts:['Immediately after finishing / Bezpośrednio po skończeniu','Only before selling the work / Tylko przed sprzedażą','After the painting is fully dry — 6–12 months / Po całkowitym wyschnięciu — 6–12 miesięcy','Before starting to paint / Przed rozpoczęciem malowania'],
+   ans:2,
+   fbEn:'Correct! Oil paintings must be fully dry — usually 6–12 months — before varnishing.',
+   fbPl:'Poprawnie! Obrazy olejne muszą być całkowicie suche — zwykle 6–12 miesięcy — przed wernisowaniem.'},
+  {type:'audio',
+   qEn:'🔊 Listen to the word and choose the correct translation.',
+   qPl:'🔊 Posłuchaj słowa i wybierz poprawne tłumaczenie.',
+   audioWord:'easel',
+   opts:['paleta / palette','sztaluga / easel','rozcieńczalnik / solvent','werniks / varnish'],
+   ans:1,
+   fbEn:'Correct! "Easel" /ˈiːzəl/ = sztaluga. A freestanding frame that holds the canvas upright.',
+   fbPl:'Brawo! "Easel" /ˈiːzəl/ = sztaluga. Wolnostojąca konstrukcja trzymająca płótno w pionie.'},
+  {type:'write',
+   qEn:'Describe in 2–3 sentences in English how you prepare a canvas for oil painting. Use at least 3 words from this module.',
+   qPl:'Opisz w 2–3 zdaniach po angielsku, jak przygotowujesz płótno do malowania olejem. Użyj co najmniej 3 słów z modułu.',
+   placeholder:'First, I stretch the canvas… then I apply gesso…',
+   modelEn:'First, I stretch the linen canvas onto the stretcher bars. Then I apply two coats of gesso, sanding lightly between each layer. Once the primer is dry, I sketch the composition before beginning with oil paint mixed with a little linseed oil.',
+   modelPl:'Najpierw naciągam płótno lniane na krosna. Następnie nakładam dwie warstwy gesso, lekko szlifując między nimi. Gdy podkład wyschnie, szkicuję kompozycję, zanim zacznę malować farbą olejną z odrobiną oleju lnianego.'},
+];
+
+// ══════════════════ STATE ══════════════════
+let curStage = 1;
+const doneStages = new Set([1]);
+let fcIdx = 0;
+const audioFiles = {};
+let quizAnswers = {};
+let quizBuilt = false;
+let qCorrect = 0, qWrong = 0;
+
+// ══════════════════ AUDIO ══════════════════
+function speakWord(text, btn) {
+  const mp3 = findMP3(text);
+  if (mp3) { playMP3(mp3, btn); return; }
+  if (!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'en-GB'; u.rate = 0.82;
+  const vv = window.speechSynthesis.getVoices();
+  const v = vv.find(x=>x.lang.startsWith('en-GB')) || vv.find(x=>x.lang.startsWith('en'));
+  if (v) u.voice = v;
+  if (btn) { btn.classList.add('sp'); u.onend = ()=>btn.classList.remove('sp'); }
+  window.speechSynthesis.speak(u);
+}
+
+function playMP3(url, btn) {
+  const a = new Audio(url);
+  if (btn) { btn.classList.add('sp'); a.onended = ()=>btn.classList.remove('sp'); }
+  a.play();
+}
+
+function findMP3(text) {
+  const key = text.toLowerCase().replace(/[^a-z0-9]/g,'');
+  for (const k in audioFiles) {
+    if (k.replace(/[^a-z0-9]/g,'') === key) return audioFiles[k];
+  }
+  return null;
+}
+
+function speakDialogSequence(lines) {
+  window.speechSynthesis.cancel();
+  let i = 0;
+  function next() {
+    if (i >= lines.length) return;
+    const txt = lines[i++].en.replace(/<[^>]+>/g,'');
+    const u = new SpeechSynthesisUtterance(txt);
+    u.lang = 'en-GB'; u.rate = 0.84;
+    const vv = window.speechSynthesis.getVoices();
+    const v = vv.find(x=>x.lang.startsWith('en-GB'))||vv.find(x=>x.lang.startsWith('en'));
+    if (v) u.voice = v;
+    u.onend = next;
+    window.speechSynthesis.speak(u);
+  }
+  next();
+}
+
+// ══════════════════ UPLOAD ══════════════════
+function handleUpload(files, listId) {
+  if (!files || files.length === 0) return;
+  let loaded = 0;
+  Array.from(files).forEach(f => {
+    const name = f.name.toLowerCase();
+    if (!name.endsWith('.mp3') && !f.type.startsWith('audio/')) return;
+    const key = name.replace(/\.mp3$/, '').replace(/[^a-z0-9\s]/g, ' ').trim();
+    // Revoke old URL if re-uploading same file
+    if (audioFiles[key]) URL.revokeObjectURL(audioFiles[key]);
+    audioFiles[key] = URL.createObjectURL(f);
+    loaded++;
+  });
+  renderUploadStatus(listId, loaded);
+  renderAudioList('1');
+  renderAudioList('2');
+}
+
+function renderUploadStatus(listId, count) {
+  const el = document.getElementById('awStatus' + listId);
+  if (!el) return;
+  if (count === 0) {
+    el.className = 'aw-status warn';
+    el.innerHTML = '⚠️ Nie znaleziono plików MP3. Upewnij się że wybierasz pliki .mp3';
+  } else {
+    const matched = WORDS.filter(w => findMP3(w.en)).length;
+    el.className = 'aw-status ok';
+    el.innerHTML = `✓ Dodano ${count} plik${count===1?'':'ów'} MP3 · Dopasowano do ${matched} z ${WORDS.length} słów`;
+  }
+}
+
+function renderAudioList(listId) {
+  const el = document.getElementById('awList' + listId);
+  if (!el) return;
+  el.innerHTML = '';
+  if (Object.keys(audioFiles).length === 0) return;
+  Object.entries(audioFiles).forEach(([name, url]) => {
+    const matched = WORDS.find(w => {
+      const wk = w.en.toLowerCase().replace(/[^a-z0-9]/g, '');
+      const nk = name.replace(/[^a-z0-9]/g, '');
+      return wk === nk;
+    });
+    const div = document.createElement('div');
+    div.className = 'aw-item';
+    div.innerHTML = `
+      <button class="aw-item-play" onclick="playMP3('${url}')">▶</button>
+      <span class="aw-item-name">🎵 ${name}.mp3</span>
+      ${matched
+        ? `<span class="aw-item-match">✓ ${matched.pl}</span>`
+        : `<span class="aw-item-nomatch">brak dopasowania</span>`}
+      <button class="aw-item-del" onclick="deleteAudio('${name}')">✕</button>
+    `;
+    el.appendChild(div);
+  });
+}
+
+function deleteAudio(name) {
+  if (audioFiles[name]) { URL.revokeObjectURL(audioFiles[name]); delete audioFiles[name]; }
+  renderAudioList('1');
+  renderAudioList('2');
+}
+
+// ══════════════════ STAGE NAV ══════════════════
+function goStage(n) {
+  document.getElementById('stage'+curStage).classList.remove('active');
+  curStage = n;
+  doneStages.add(n);
+  document.getElementById('stage'+n).classList.add('active');
+  updateSteps();
+  window.scrollTo({top:0,behavior:'smooth'});
+  if (n === 5 && !quizBuilt) buildQuiz();
+}
+
+function updateSteps() {
+  for (let i=1;i<=5;i++) {
+    const s = document.querySelector(`.stp[data-s="${i}"]`);
+    s.classList.remove('active','done');
+    if (i === curStage) s.classList.add('active');
+    else if (i < curStage) s.classList.add('done');
+    const c = document.getElementById('sc'+i);
+    if (c) c.classList.toggle('done', i < curStage);
+  }
+}
+
+// ══════════════════ STAGE 1 ══════════════════
+function buildWordCards() {
+  const g = document.getElementById('wordsGrid');
+  WORDS.forEach((w,i) => {
+    const d = document.createElement('div');
+    d.className = 'wcard';
+    d.innerHTML = `
+      <div class="wc-top">
+        <div class="wc-num">0${i+1}</div>
+        <button class="spk" id="spk${i}" onclick="speakWord('${w.en}',this)">🔊</button>
+      </div>
+      <div class="wc-en">${w.en}</div>
+      <div class="wc-pron">${w.pron}</div>
+      <div class="wc-pl">${w.pl}</div>
+      <div class="wc-def-en">${w.defEn}</div>
+      <div class="wc-def-pl">${w.defPl}</div>
+    `;
+    g.appendChild(d);
+  });
+}
+
+// ══════════════════ STAGE 2 ══════════════════
+function renderFC() {
+  const w = WORDS[fcIdx];
+  document.getElementById('fc3d').classList.remove('flipped');
+  document.getElementById('fcWord').textContent = w.en;
+  document.getElementById('fcPron').textContent = w.pron;
+  document.getElementById('fcPlSmall').textContent = w.pl;
+  document.getElementById('fcPlBack').textContent = w.pl;
+  document.getElementById('fcMemEn').textContent = '💡 ' + w.memEn;
+  document.getElementById('fcMemPl').textContent = w.memPl;
+  document.getElementById('fcEtymEn').textContent = '📖 ' + w.etymEn;
+  document.getElementById('fcEtymPl').textContent = w.etymPl;
+  document.getElementById('fcCnt').textContent = `${fcIdx+1} / ${WORDS.length}`;
+}
+
+function flipFC() { document.getElementById('fc3d').classList.toggle('flipped'); }
+function fcMove(d) { fcIdx = (fcIdx+d+WORDS.length)%WORDS.length; renderFC(); }
+
+// ══════════════════ STAGE 3 ══════════════════
+function buildContext() {
+  const list = document.getElementById('ctxList');
+  const tagCls = {d:'tag-d',t:'tag-t',c:'tag-c'};
+  const tagLbl = {d:'Technika',t:'Moja praca',c:'Z klientem'};
+  CONTEXT.forEach(item => {
+    const rows = item.rows.map(r=>`
+      <div class="ctx-row">
+        <div class="ctx-tag-cell"><span class="ctx-tag ${tagCls[r.tag]}">${tagLbl[r.tag]}</span></div>
+        <div class="ctx-en">${r.en}</div>
+        <div class="ctx-pl-txt">${r.pl}</div>
+      </div>`).join('');
+    const d = document.createElement('div');
+    d.className = 'ctx-item';
+    d.innerHTML = `
+      <div class="ctx-head">
+        <div class="ctx-word">${item.en}</div>
+        <div class="ctx-pl-badge">${item.pl}</div>
+        <button class="spk" style="margin-left:auto" onclick="speakWord('${item.en}',this)">🔊</button>
+      </div>
+      <div class="ctx-col-head">
+        <div></div><div>🇬🇧 English</div><div>🇵🇱 Polski</div>
+      </div>
+      ${rows}
+    `;
+    list.appendChild(d);
+  });
+}
+
+// ══════════════════ STAGE 4 ══════════════════
+function buildDialogs() {
+  buildOneDialog(DIALOG1, 'conv1');
+  buildOneDialog(DIALOG2, 'conv2');
+}
+
+function buildOneDialog(dlg, targetId) {
+  const bubblesHtml = dlg.lines.map(l=>`
+    <div class="bubble ${l.side}">
+      <div class="b-name">${l.name}</div>
+      <div class="b-wrap">
+        <div class="b-en">${l.en}</div>
+        <div class="b-pl">${l.pl}</div>
+      </div>
+    </div>`).join('');
+
+  const chipsHtml = dlg.chips.map(c=>{
+    const [enPart] = c.split(' · ');
+    return `<div class="chip" onclick="speakWord('${enPart}',this)">${c}</div>`;
+  }).join('');
+
+  document.getElementById(targetId).innerHTML = `
+    <div class="conv-hdr">
+      <div>
+        <div class="conv-title">${dlg.title}</div>
+        <div style="font-family:var(--ff-u);font-size:11px;color:rgba(248,244,237,.5);margin-top:2px;font-style:italic">${dlg.titleEn}</div>
+      </div>
+      <div class="conv-tag">${dlg.tag}</div>
+      <button class="spk" style="margin-left:auto;border-color:rgba(255,255,255,.3);color:rgba(248,244,237,.7)" onclick="speakDialogSequence(${JSON.stringify(dlg.lines).replace(/"/g,'&quot;')})">🔊</button>
+    </div>
+    <div class="conv-body">
+      ${bubblesHtml}
+      <div class="conv-vocab">
+        <div class="cv-title">Słowa z dialogu · Kliknij aby usłyszeć</div>
+        <div class="chips">${chipsHtml}</div>
+      </div>
+    </div>
+  `;
+}
+
+// ══════════════════ STAGE 5 QUIZ ══════════════════
+function buildQuiz() {
+  quizBuilt = true;
+  const container = document.getElementById('quizBlocks');
+  container.innerHTML = '';
+  const typeLbl = {mc:'Wybór wielokrotny',fill:'Uzupełnij lukę',audio:'Posłuchaj i wybierz',write:'Zadanie otwarte'};
+  const typeBdg = {mc:'bmc',fill:'bfl',audio:'bau',write:'bwr'};
+
+  QUIZ.forEach((q,qi) => {
+    const div = document.createElement('div');
+    div.className = 'q-block'; div.id='qb'+qi;
+    let inner = `
+      <div class="q-top">
+        <div class="q-num">Pytanie ${qi+1} z ${QUIZ.length}</div>
+        <div class="q-badge ${typeBdg[q.type]}">${typeLbl[q.type]}</div>
+        <div class="q-text">${q.qEn}</div>
+        <div class="q-text-pl">${q.qPl}</div>
+      </div>`;
+
+    if (q.type==='mc'||q.type==='audio') {
+      if (q.type==='audio') {
+        inner += `<div class="q-audio-row">
+          <button class="nav-btn" onclick="speakWord('${q.audioWord}',this)">🔊 Odsłuchaj: "${q.audioWord}"</button>
+          <span style="font-family:var(--ff-u);font-size:11px;color:var(--muted)">Kliknij kilkakrotnie jeśli potrzebujesz</span>
+        </div>`;
+      }
+      inner += `<div class="q-opts">`;
+      ['A','B','C','D'].forEach((l,oi)=>{
+        inner+=`<button class="qo" id="qo_${qi}_${oi}" onclick="pickMC(${qi},${oi})"><span class="ql">${l}.</span>${q.opts[oi]}</button>`;
+      });
+      inner += `</div>`;
+    } else if (q.type==='fill') {
+      inner += `<div class="q-fill-row">
+        <input class="qfi" id="qfi${qi}" placeholder="Wpisz brakujące słowo / Type the missing word…" onkeydown="if(event.key==='Enter')checkFill(${qi})">
+        <button class="q-chk" onclick="checkFill(${qi})">Sprawdź</button>
+      </div>`;
+    } else if (q.type==='write') {
+      inner += `<div class="q-write-row">
+        <div style="font-family:var(--ff-u);font-size:11px;color:var(--muted);margin-bottom:6px;letter-spacing:.05em">Wpisz odpowiedź poniżej / Write your answer below:</div>
+        <textarea class="qwi" id="qwi${qi}" placeholder="${q.placeholder}" rows="4"></textarea>
+        <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+          <button class="nav-btn" onclick="showModel(${qi})">💡 Pokaż wzorcową odpowiedź</button>
+        </div>
+      </div>`;
+    }
+
+    inner += `<div class="q-fb" id="qfb${qi}"></div>`;
+    div.innerHTML = inner;
+    container.appendChild(div);
+  });
+
+  document.getElementById('finishBtn').style.display = 'inline-block';
+  updateQuizBar();
+}
+
+function pickMC(qi, oi) {
+  const q = QUIZ[qi];
+  const blk = document.getElementById('qb'+qi);
+  if (blk.dataset.answered) return;
+  blk.dataset.answered = '1';
+  const allBtns = blk.querySelectorAll('.qo');
+  allBtns.forEach(b=>b.classList.add('locked'));
+  allBtns[q.ans].classList.add('ok');
+  const isOk = oi===q.ans;
+  if (!isOk) allBtns[oi].classList.add('err');
+  quizAnswers[qi] = isOk;
+  if (isOk) qCorrect++; else qWrong++;
+  showFB(qi, isOk, q.fbEn, q.fbPl);
+  if (isOk) speakWord(q.audioWord || q.opts[q.ans].split(' / ')[0]);
+  updateQuizBar();
+}
+
+function checkFill(qi) {
+  const q = QUIZ[qi];
+  const inp = document.getElementById('qfi'+qi);
+  if (inp.disabled) return;
+  inp.disabled = true;
+  const val = inp.value.trim().toLowerCase();
+  const cor = q.ans.toLowerCase();
+  const isOk = val===cor || lev(val,cor)<=1;
+  inp.classList.add(isOk?'ok':'err');
+  if (!isOk) inp.value = inp.value + '  →  ' + q.ans;
+  quizAnswers[qi] = isOk;
+  if (isOk) qCorrect++; else qWrong++;
+  showFB(qi, isOk, q.fbEn, q.fbPl);
+  if (isOk) speakWord(q.ans);
+  updateQuizBar();
+}
+
+function showModel(qi) {
+  const q = QUIZ[qi];
+  quizAnswers[qi] = true;
+  const fb = document.getElementById('qfb'+qi);
+  fb.className = 'q-fb show info';
+  fb.innerHTML = `📝 Wzorcowa odpowiedź (EN):<br><em>"${q.modelEn}"</em><br><br class="q-fb-pl">🇵🇱 Tłumaczenie wzoru:<br><em style="opacity:.75">"${q.modelPl}"</em>`;
+}
+
+function showFB(qi, ok, enTxt, plTxt) {
+  const fb = document.getElementById('qfb'+qi);
+  fb.className = 'q-fb show '+(ok?'ok':'err');
+  fb.innerHTML = `${ok?'✓':'✗'} ${enTxt}<br><span class="q-fb-pl">${plTxt}</span>`;
+}
+
+function updateQuizBar() {
+  const done = Object.keys(quizAnswers).length;
+  const total = QUIZ.length;
+  document.getElementById('qtbProg').textContent = `Pytanie ${Math.min(done+1,total)} z ${total}`;
+  document.getElementById('qbarFill').style.width = (done/total*100)+'%';
+  document.getElementById('scOk').textContent = `✓ ${qCorrect}`;
+  document.getElementById('scErr').textContent = `✗ ${qWrong}`;
+}
+
+function finishQuiz() {
+  const total = QUIZ.length;
+  const correct = Object.values(quizAnswers).filter(Boolean).length;
+  const pct = Math.round(correct/total*100);
+  const grade = pct>=88?'A':pct>=68?'B':'C';
+  const msgs = {
+    A:['Excellent! You\'ve mastered Module 1!','Doskonale! Opanowałeś Moduł 1!'],
+    B:['Very good! A little more practice and you\'ll be perfect.','Bardzo dobrze! Jeszcze trochę ćwiczeń i będzie idealnie.'],
+    C:['Good start! Go back to the flashcards and try again.','Dobry start! Wróć do fiszek i spróbuj jeszcze raz.'],
+  };
+  const gcls = {A:'rga',B:'rgb',C:'rgc'};
+  document.getElementById('quizBlocks').style.display = 'none';
+  document.getElementById('quizNavBar').style.display = 'none';
+  const rp = document.getElementById('resPanel');
+  rp.style.display = 'block';
+  rp.innerHTML = `
+    <div class="res-panel">
+      <div class="res-grade ${gcls[grade]}">${grade}</div>
+      <div class="res-msg">${msgs[grade][0]}</div>
+      <div class="res-msg-pl">${msgs[grade][1]}</div>
+      <div class="res-stats">
+        <div class="rs"><span class="rs-v" style="color:var(--sage)">${correct}</span><span class="rs-l">Poprawne</span></div>
+        <div class="rs"><span class="rs-v" style="color:var(--rust)">${total-correct}</span><span class="rs-l">Błędne</span></div>
+        <div class="rs"><span class="rs-v" style="color:var(--ochre)">${pct}%</span><span class="rs-l">Wynik</span></div>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+        <button class="nav-btn" onclick="retakeQuiz()">⟳ Spróbuj ponownie</button>
+        <button class="nav-btn" onclick="goStage(2)">🃏 Wróć do fiszek</button>
+        <button class="nav-btn pri" onclick="alert('Moduł 2 — Techniki nakładania farby — już wkrótce!')">Moduł 2 →</button>
+      </div>
+    </div>`;
+}
+
+function retakeQuiz() {
+  quizAnswers={}; qCorrect=0; qWrong=0; quizBuilt=false;
+  document.getElementById('quizBlocks').style.display='block';
+  document.getElementById('quizBlocks').innerHTML='';
+  document.getElementById('resPanel').style.display='none';
+  document.getElementById('quizNavBar').style.display='flex';
+  buildQuiz();
+}
+
+function lev(a,b){
+  const m=a.length,n=b.length;
+  const dp=Array.from({length:m+1},(_,i)=>Array.from({length:n+1},(_,j)=>i===0?j:j===0?i:0));
+  for(let i=1;i<=m;i++)for(let j=1;j<=n;j++)
+    dp[i][j]=a[i-1]===b[j-1]?dp[i-1][j-1]:1+Math.min(dp[i-1][j],dp[i][j-1],dp[i-1][j-1]);
+  return dp[m][n];
+}
+
+// ══════════════════ INIT ══════════════════
+buildWordCards();
+renderFC();
+buildContext();
+buildDialogs();
+if ('speechSynthesis' in window) {
+  window.speechSynthesis.getVoices();
+  window.speechSynthesis.onvoiceschanged = ()=>{};
+}
+</script>
+
+<!-- OFFLINE BANNER -->
+<div class="offline-bar" id="offlineBar"></div>
+
+<!-- INSTALL BANNER (Android / Desktop Chrome) -->
+<div class="install-bar" id="installBar">
+  <div class="install-bar-text">
+    <div class="install-bar-title">📲 Zainstaluj ArtVocab</div>
+    <div class="install-bar-sub">Działa offline · Ikona na ekranie głównym · Zero reklam</div>
+  </div>
+  <button class="install-btn" id="installBtn">Zainstaluj</button>
+  <button class="install-dismiss" id="installDismiss">✕</button>
+</div>
+
+<!-- PWA JS — musi być po elementach HTML -->
+<script>
+// ── SERVICE WORKER ──────────────────────────────────
+// Rejestruj tylko na GitHub Pages (nie na claudeusercontent)
+const isGitHubPages = location.hostname.endsWith('github.io') ||
+                      location.hostname.endsWith('github.com') ||
+                      (location.protocol === 'file:');
+
+if ('serviceWorker' in navigator && isGitHubPages) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('../sw.js')
+      .then(reg => console.log('[PWA] SW registered:', reg.scope))
+      .catch(err => console.log('[PWA] SW error:', err));
+  });
+}
+
+// ── OFFLINE DETECTION ───────────────────────────────
+const offlineBar = document.getElementById('offlineBar');
+
+function updateOnlineStatus() {
+  if (!offlineBar) return;
+  if (!navigator.onLine) {
+    offlineBar.textContent = '📵 Brak połączenia — aplikacja działa w trybie offline';
+    offlineBar.className = 'offline-bar show';
+  } else {
+    offlineBar.textContent = '✓ Połączenie przywrócone';
+    offlineBar.className = 'offline-bar show online-bar';
+    setTimeout(() => offlineBar.classList.remove('show'), 2500);
+  }
+}
+
+window.addEventListener('online',  updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+if (!navigator.onLine) updateOnlineStatus();
+
+// ── INSTALL PROMPT (Chrome / Edge / Android) ────────
+let deferredPrompt = null;
+const installBar     = document.getElementById('installBar');
+const installBtn     = document.getElementById('installBtn');
+const installDismiss = document.getElementById('installDismiss');
+
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  if (installBar && !window.matchMedia('(display-mode: standalone)').matches) {
+    installBar.classList.add('show');
+  }
+});
+
+if (installBtn) {
+  installBtn.addEventListener('click', async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    if (installBar) installBar.classList.remove('show');
+  });
+}
+
+if (installDismiss) {
+  installDismiss.addEventListener('click', () => {
+    if (installBar) installBar.classList.remove('show');
+  });
+}
+
+// Ukryj baner jeśli już zainstalowana jako PWA
+if (installBar && window.matchMedia('(display-mode: standalone)').matches) {
+  installBar.style.display = 'none';
+}
+</script>
+
+</body>
+</html>
