@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>ArtVocab — English for Artists</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#5c3d2e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ArtVocab">
+<link rel="apple-touch-icon" href="icon-512.png">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cream:#f8f4ed;--warm:#f2ebe0;--paper:#ede5d8;
+  --ink:#1c1812;--brown:#5c3d2e;--ochre:#c47e2a;
+  --ochre-l:#e8a44a;--rust:#a03820;--sage:#5a7a5c;
+  --muted:#8a7e72;--border:rgba(92,61,46,0.15);
+  --shadow:rgba(28,24,18,0.10);
+  --ff-h:'Playfair Display',serif;
+  --ff-b:'Libre Baskerville',serif;
+  --ff-u:'Outfit',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--cream);color:var(--ink);font-family:var(--ff-b);min-height:100vh;}
+
+/* HEADER */
+.hdr{background:var(--brown);color:var(--cream);padding:52px 48px 44px;position:relative;overflow:hidden;}
+.hdr::after{content:'ART';position:absolute;right:24px;bottom:-20px;font-family:var(--ff-h);font-size:180px;font-weight:700;color:rgba(255,255,255,0.04);letter-spacing:-0.04em;line-height:1;pointer-events:none;user-select:none;}
+.hdr-label{font-family:var(--ff-u);font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:rgba(248,244,237,.5);margin-bottom:12px;}
+.hdr-title{font-family:var(--ff-h);font-size:clamp(36px,6vw,68px);font-weight:700;line-height:1.0;margin-bottom:8px;}
+.hdr-title em{font-style:italic;color:var(--ochre-l);}
+.hdr-sub{font-family:var(--ff-b);font-style:italic;font-size:17px;color:rgba(248,244,237,.6);margin-bottom:28px;max-width:560px;line-height:1.6;}
+.hdr-stats{display:flex;gap:32px;flex-wrap:wrap;}
+.hdr-stat{display:flex;flex-direction:column;gap:2px;}
+.hdr-stat-val{font-family:var(--ff-h);font-size:32px;font-weight:700;color:var(--ochre-l);line-height:1;}
+.hdr-stat-lbl{font-family:var(--ff-u);font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:rgba(248,244,237,.4);}
+
+/* MAIN */
+main{max-width:900px;margin:0 auto;padding:52px 32px 80px;}
+
+.section-eye{font-family:var(--ff-u);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--ochre);margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+.section-eye::before{content:'';display:inline-block;width:22px;height:2px;background:var(--ochre);border-radius:1px;}
+.section-title{font-family:var(--ff-h);font-size:clamp(24px,3vw,36px);font-weight:700;color:var(--brown);margin-bottom:6px;}
+.section-desc{font-family:var(--ff-b);font-style:italic;font-size:15px;color:var(--muted);margin-bottom:32px;line-height:1.65;}
+
+/* MODULE GRID */
+.modules-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-bottom:52px;}
+
+.module-card{background:#fff;border:1px solid var(--border);border-radius:8px;overflow:hidden;transition:all .22s;position:relative;text-decoration:none;color:inherit;display:flex;flex-direction:column;}
+.module-card:hover{box-shadow:0 6px 24px var(--shadow);transform:translateY(-3px);}
+.module-card.locked{opacity:.55;cursor:default;pointer-events:none;}
+.module-card.locked:hover{transform:none;box-shadow:none;}
+
+.mc-top{padding:20px 20px 16px;flex:1;}
+.mc-num{font-family:var(--ff-u);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.mc-icon{font-size:28px;margin-bottom:10px;}
+.mc-en{font-family:var(--ff-h);font-size:20px;font-weight:700;color:var(--brown);line-height:1.2;margin-bottom:4px;}
+.mc-pl{font-family:var(--ff-u);font-size:12px;color:var(--muted);margin-bottom:10px;}
+.mc-desc{font-size:13px;color:var(--muted);line-height:1.55;}
+
+.mc-footer{padding:12px 20px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--warm);}
+.mc-words{font-family:var(--ff-u);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+.mc-status{font-family:var(--ff-u);font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:3px;}
+.status-available{background:rgba(90,122,92,.12);color:var(--sage);}
+.status-locked{background:rgba(138,126,114,.1);color:var(--muted);}
+.status-new{background:rgba(196,126,42,.12);color:var(--ochre);}
+
+.mc-bar{height:3px;background:var(--border);}
+.mc-bar-fill{height:100%;border-radius:0;transition:width .4s;}
+
+/* HOW IT WORKS */
+.how-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:52px;}
+.how-card{background:#fff;border:1px solid var(--border);border-radius:6px;padding:20px;}
+.how-num{font-family:var(--ff-h);font-size:36px;font-weight:700;color:var(--ochre);margin-bottom:8px;line-height:1;}
+.how-title{font-family:var(--ff-u);font-size:13px;font-weight:600;color:var(--brown);margin-bottom:6px;}
+.how-desc{font-size:13px;color:var(--muted);line-height:1.55;}
+
+/* OFFLINE BANNER */
+.offline-bar{position:fixed;top:0;left:0;right:0;z-index:9999;padding:10px 20px;background:var(--rust);color:#fff;font-family:var(--ff-u);font-size:12px;text-align:center;letter-spacing:.06em;transform:translateY(-100%);transition:transform .3s ease;}
+.offline-bar.show{transform:translateY(0);}
+.offline-bar.online{background:var(--sage);}
+
+/* INSTALL BANNER */
+.install-bar{position:fixed;bottom:0;left:0;right:0;z-index:9998;padding:14px 20px;background:var(--brown);color:var(--cream);font-family:var(--ff-u);font-size:13px;display:none;align-items:center;gap:12px;flex-wrap:wrap;box-shadow:0 -4px 20px rgba(0,0,0,.2);}
+.install-bar.show{display:flex;}
+.ib-text{flex:1;}
+.ib-title{font-weight:600;margin-bottom:2px;}
+.ib-sub{font-size:11px;opacity:.7;}
+.ib-btn{padding:8px 18px;background:var(--ochre);border:none;border-radius:4px;color:#fff;font-family:var(--ff-u);font-size:12px;font-weight:600;cursor:pointer;}
+.ib-x{background:none;border:none;color:rgba(248,244,237,.5);font-size:18px;cursor:pointer;padding:4px;}
+
+/* FOOTER */
+footer{text-align:center;padding:32px;border-top:1px solid var(--border);font-family:var(--ff-u);font-size:11px;color:var(--muted);letter-spacing:.08em;}
+
+/* RESPONSIVE */
+@media(max-width:600px){
+  .hdr{padding:32px 20px 28px;}
+  main{padding:32px 16px 60px;}
+  .modules-grid{grid-template-columns:1fr;}
+  .how-grid{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-label">English for Artists · Kurs językowy</div>
+  <div class="hdr-title"><em>ArtVocab</em><br>English for Artists</div>
+  <div class="hdr-sub">Angielski dla malarzy i grafików — ucz się słownictwa swojej branży przez fiszki, kontekst i konwersację.</div>
+  <div class="hdr-stats">
+    <div class="hdr-stat"><span class="hdr-stat-val">8</span><span class="hdr-stat-lbl">Modułów</span></div>
+    <div class="hdr-stat"><span class="hdr-stat-val">100+</span><span class="hdr-stat-lbl">Słów</span></div>
+    <div class="hdr-stat"><span class="hdr-stat-val">5</span><span class="hdr-stat-lbl">Etapów / moduł</span></div>
+  </div>
+</div>
+
+<main>
+
+  <!-- MODULES -->
+  <div class="section-eye">Moduły kursu</div>
+  <div class="section-title">Wybierz moduł</div>
+  <div class="section-desc">Każdy moduł to 5 etapów: słownictwo → fiszki → kontekst → konwersacja → quiz.</div>
+
+  <div class="modules-grid">
+
+    <a class="module-card" href="modul1/index.html">
+      <div class="mc-bar"><div class="mc-bar-fill" style="width:100%;background:var(--ochre);"></div></div>
+      <div class="mc-top">
+        <div class="mc-num">Moduł 01</div>
+        <div class="mc-icon">🎨</div>
+        <div class="mc-en">Oil Painting</div>
+        <div class="mc-pl">Malarstwo olejne</div>
+        <div class="mc-desc">Materiały i narzędzia: płótno, sztaluga, paleta, olej lniany, gesso, terpentyna i więcej.</div>
+      </div>
+      <div class="mc-footer">
+        <span class="mc-words">12 słów · 5 etapów</span>
+        <span class="mc-status status-available">Dostępny</span>
+      </div>
+    </a>
+
+    <div class="module-card locked">
+      <div class="mc-bar"><div class="mc-bar-fill" style="width:0%;background:var(--ochre);"></div></div>
+      <div class="mc-top">
+        <div class="mc-num">Moduł 02</div>
+        <div class="mc-icon">🖌</div>
+        <div class="mc-en">Painting Techniques</div>
+        <div class="mc-pl">Techniki malarskie</div>
+        <div class="mc-desc">Impasto, glazing, alla prima, scumbling, dry brush — techniki nakładania farby.</div>
+      </div>
+      <div class="mc-footer">
+        <span class="mc-words">~12 słów · 5 etapów</span>
+        <span class="mc-status status-locked">Wkrótce</span>
+      </div>
+    </div>
+
+    <div class="module-card locked">
+      <div class="mc-bar"><div class="mc-bar-fill" style="width:0%;background:var(--ochre);"></div></div>
+      <div class="mc-top">
+        <div class="mc-num">Moduł 03</div>
+        <div class="mc-icon">🌈</div>
+        <div class="mc-en">Colour Theory</div>
+        <div class="mc-pl">Teoria koloru</div>
+        <div class="mc-desc">Hue, saturation, value, chiaroscuro — terminologia koloru i światłocienia.</div>
+      </div>
+      <div class="mc-footer">
+        <span class="mc-words">~12 słów · 5 etapów</span>
+        <span class="mc-status status-locked">Wkrótce</span>
+      </div>
+    </div>
+
+    <div class="module-card locked">
+      <div class="mc-bar"><div class="mc-bar-fill" style="width:0%;background:var(--ochre);"></div></div>
+      <div class="mc-top">
+        <div class="mc-num">Moduł 04</div>
+        <div class="mc-icon">📐</div>
+        <div class="mc-en">Composition</div>
+        <div class="mc-pl">Kompozycja</div>
+        <div class="mc-desc">Rule of thirds, focal point, negative space, leading line — anatomia obrazu.</div>
+      </div>
+      <div class="mc-footer">
+        <span class="mc-words">~12 słów · 5 etapów</span>
+        <span class="mc-status status-locked">Wkrótce</span>
+      </div>
+    </div>
+
+    <div class="module-card locked">
+      <div class="mc-bar"><div class="mc-bar-fill" style="width:0%;background:var(--ochre);"></div></div>
+      <div class="mc-top">
+        <div class="mc-num">Moduł 05</div>
+        <div class="mc-icon">💻</div>
+        <div class="mc-en">Digital Graphics</div>
+        <div class="mc-pl">Grafika cyfrowa</div>
+        <div class="mc-desc">Vector, raster, layers, blend modes, typography — podstawy grafiki cyfrowej.</div>
+      </div>
+      <div class="mc-footer">
+        <span class="mc-words">~12 słów · 5 etapów</span>
+        <span class="mc-status status-locked">Wkrótce</span>
+      </div>
+    </div>
+
+    <div class="module-card locked">
+      <div class="mc-bar"><div class="mc-bar-fill" style="width:0%;background:var(--ochre);"></div></div>
+      <div class="mc-top">
+        <div class="mc-num">Moduł 06</div>
+        <div class="mc-icon">🖼</div>
+        <div class="mc-en">Art Movements</div>
+        <div class="mc-pl">Style artystyczne</div>
+        <div class="mc-desc">Impressionism, Expressionism, Surrealism, Cubism — kierunki i style w sztuce.</div>
+      </div>
+      <div class="mc-footer">
+        <span class="mc-words">~14 słów · 5 etapów</span>
+        <span class="mc-status status-locked">Wkrótce</span>
+      </div>
+    </div>
+
+    <div class="module-card locked">
+      <div class="mc-bar"><div class="mc-bar-fill" style="width:0%;background:var(--ochre);"></div></div>
+      <div class="mc-top">
+        <div class="mc-num">Moduł 07</div>
+        <div class="mc-icon">📁</div>
+        <div class="mc-en">Portfolio & Description</div>
+        <div class="mc-pl">Portfolio i opis prac</div>
+        <div class="mc-desc">Jak opisywać własne prace po angielsku — do portfolio, social mediów i galerii.</div>
+      </div>
+      <div class="mc-footer">
+        <span class="mc-words">~10 słów · 5 etapów</span>
+        <span class="mc-status status-locked">Wkrótce</span>
+      </div>
+    </div>
+
+    <div class="module-card locked">
+      <div class="mc-bar"><div class="mc-bar-fill" style="width:0%;background:var(--ochre);"></div></div>
+      <div class="mc-top">
+        <div class="mc-num">Moduł 08</div>
+        <div class="mc-icon">🤝</div>
+        <div class="mc-en">Sales & Galleries</div>
+        <div class="mc-pl">Sprzedaż i galerie</div>
+        <div class="mc-desc">Commission, invoice, vernissage, copyright — rozmowy z klientami i galeriami.</div>
+      </div>
+      <div class="mc-footer">
+        <span class="mc-words">~12 słów · 5 etapów</span>
+        <span class="mc-status status-locked">Wkrótce</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <div class="section-eye">Jak działa kurs</div>
+  <div class="section-title">5 etapów w każdym module</div>
+  <div class="section-desc">Sprawdzona metoda nauki — od poznania słowa do swobodnego użycia w rozmowie.</div>
+
+  <div class="how-grid">
+    <div class="how-card">
+      <div class="how-num">①</div>
+      <div class="how-title">Wprowadzenie</div>
+      <div class="how-desc">12 kluczowych słów z definicją po angielsku i polsku, wymową IPA i przyciskiem 🔊.</div>
+    </div>
+    <div class="how-card">
+      <div class="how-num">②</div>
+      <div class="how-title">Fiszki</div>
+      <div class="how-desc">Obracane karty ze skojarzeniem pamięciowym i etymologią — w obu językach.</div>
+    </div>
+    <div class="how-card">
+      <div class="how-num">③</div>
+      <div class="how-title">Kontekst</div>
+      <div class="how-desc">Każde słowo w 3 zdaniach: opis techniki, opis własnej pracy, rozmowa z klientem.</div>
+    </div>
+    <div class="how-card">
+      <div class="how-num">④</div>
+      <div class="how-title">Konwersacja</div>
+      <div class="how-desc">Realistyczne dialogi PL+EN: w pracowni i ze sprzedażą obrazu. Odsłuch 🔊.</div>
+    </div>
+    <div class="how-card">
+      <div class="how-num">⑤</div>
+      <div class="how-title">Quiz</div>
+      <div class="how-desc">8 pytań: wybór wielokrotny, uzupełnianie luk, słuchanie i zadanie otwarte. Ocena A/B/C.</div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  ArtVocab · English for Artists · grzegorzjankwiatosz-artist.github.io/artvocab
+</footer>
+
+<!-- OFFLINE BANNER -->
+<div class="offline-bar" id="offlineBar"></div>
+
+<!-- INSTALL BANNER -->
+<div class="install-bar" id="installBar">
+  <div class="ib-text">
+    <div class="ib-title">📲 Zainstaluj ArtVocab</div>
+    <div class="ib-sub">Działa offline · Ikona na ekranie głównym · Wszystkie moduły</div>
+  </div>
+  <button class="ib-btn" id="installBtn">Zainstaluj</button>
+  <button class="ib-x" id="installDismiss">✕</button>
+</div>
+
+<script>
+// SERVICE WORKER
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(r => console.log('[PWA] SW ok:', r.scope))
+      .catch(e => console.warn('[PWA] SW:', e.message));
+  });
+}
+
+// OFFLINE
+const offlineBar = document.getElementById('offlineBar');
+function updateOnline() {
+  if (!offlineBar) return;
+  if (!navigator.onLine) {
+    offlineBar.textContent = '📵 Brak połączenia — aplikacja działa offline';
+    offlineBar.className = 'offline-bar show';
+  } else {
+    offlineBar.textContent = '✓ Połączenie przywrócone';
+    offlineBar.className = 'offline-bar show online';
+    setTimeout(() => offlineBar.classList.remove('show'), 2500);
+  }
+}
+window.addEventListener('online', updateOnline);
+window.addEventListener('offline', updateOnline);
+if (!navigator.onLine) updateOnline();
+
+// INSTALL
+let dp = null;
+const installBar     = document.getElementById('installBar');
+const installBtn     = document.getElementById('installBtn');
+const installDismiss = document.getElementById('installDismiss');
+
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault(); dp = e;
+  if (installBar && !window.matchMedia('(display-mode:standalone)').matches)
+    installBar.classList.add('show');
+});
+if (installBtn) installBtn.addEventListener('click', async () => {
+  if (!dp) return;
+  dp.prompt();
+  await dp.userChoice;
+  dp = null;
+  if (installBar) installBar.classList.remove('show');
+});
+if (installDismiss) installDismiss.addEventListener('click', () => {
+  if (installBar) installBar.classList.remove('show');
+});
+if (installBar && window.matchMedia('(display-mode:standalone)').matches)
+  installBar.style.display = 'none';
+</script>
+</body>
+</html>

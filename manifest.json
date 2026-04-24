@@ -1,0 +1,27 @@
+{
+  "name": "ArtVocab — English for Artists",
+  "short_name": "ArtVocab",
+  "description": "Kurs angielskiego dla malarzy i grafików",
+  "start_url": "/artvocab/",
+  "scope": "/artvocab/",
+  "display": "standalone",
+  "background_color": "#f8f4ed",
+  "theme_color": "#5c3d2e",
+  "orientation": "any",
+  "lang": "pl",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education"]
+}
