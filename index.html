@@ -350,5 +350,52 @@ if (installDismiss) installDismiss.addEventListener('click', () => {
 if (installBar && window.matchMedia('(display-mode:standalone)').matches)
   installBar.style.display = 'none';
 </script>
+<script>
+let newWorker = null;
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').then(reg => {
+
+    // wykrycie nowej wersji
+    reg.addEventListener('updatefound', () => {
+      newWorker = reg.installing;
+
+      newWorker.addEventListener('statechange', () => {
+        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+          showUpdateBanner();
+        }
+      });
+    });
+  });
+
+  // po aktywacji → reload
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    window.location.reload();
+  });
+}
+
+// UI (prosty banner)
+function showUpdateBanner() {
+  const bar = document.createElement('div');
+  bar.style = `
+    position:fixed;bottom:0;left:0;right:0;
+    background:#5c3d2e;color:#fff;
+    padding:12px;text-align:center;
+    z-index:9999;font-family:sans-serif;
+  `;
+  bar.innerHTML = `
+    🔄 Nowa wersja dostępna
+    <button style="margin-left:10px;padding:6px 12px;">
+      Odśwież
+    </button>
+  `;
+
+  bar.querySelector('button').onclick = () => {
+    newWorker.postMessage('SKIP_WAITING');
+  };
+
+  document.body.appendChild(bar);
+}
+</script>
 </body>
 </html>
